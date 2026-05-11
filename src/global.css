@@ -1,0 +1,109 @@
+@import 'uniwind';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  /* ── Wasla Design System Tokens ───────────────────────────────────────
+     All values are HSL channels (H S% L%) so Tailwind can compose opacity:
+     e.g.  bg-primary/50  →  hsl(258 52% 54% / 0.5)
+  ────────────────────────────────────────────────────────────────────── */
+
+  /* Font */
+  --font-family-sans: 'Rubik', ui-sans-serif, system-ui, sans-serif;
+
+  /* Semantic palette — light mode */
+  --color-background: 180 25% 98%;
+  --color-foreground: 199 41% 12%;
+
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 199 41% 12%;
+
+  --color-primary: 258 52% 54%;
+  --color-primary-foreground: 210 100% 99%;
+
+  --color-secondary: 258 45% 96%;
+  --color-secondary-foreground: 199 25% 25%;
+
+  --color-muted: 200 20% 94%;
+  --color-muted-foreground: 198 15% 45%;
+
+  --color-accent: 258 45% 96%;
+  --color-accent-foreground: 198 25% 36%;
+
+  --color-destructive: 0 84% 60%;
+  --color-destructive-foreground: 0 0% 98%;
+
+  --color-border: 198 21% 88%;
+  --color-input: 198 21% 88%;
+  --color-ring: 198 25% 36%;
+
+  /* Success (online dots, confirmations) */
+  --color-success: 142 71% 45%;
+  --color-success-foreground: 0 0% 100%;
+
+  /* Warning (pending badges) */
+  --color-warning: 38 92% 50%;
+  --color-warning-foreground: 0 0% 100%;
+
+  /* Shadows */
+  --shadow-sm: 0px 4px 10px 0px hsl(196 22% 10% / 0.04);
+  --shadow-md: 0px 8px 20px 0px hsl(196 22% 10% / 0.08);
+  --shadow-lg: 0px 16px 40px 0px hsl(196 22% 10% / 0.12);
+
+  /* MD3 token aliases — mapped to existing semantic palette */
+  --color-surface: var(--color-background);
+  --color-surface-container-lowest: var(--color-card);
+  --color-surface-container-low: 258 30% 97%;
+  --color-surface-container: var(--color-secondary);
+  --color-surface-container-high: 258 20% 92%;
+  --color-surface-variant: var(--color-muted);
+  --color-on-surface: var(--color-foreground);
+  --color-on-surface-variant: var(--color-muted-foreground);
+  --color-outline: 258 10% 50%;
+  --color-outline-variant: var(--color-border);
+  --color-primary-fixed: 258 45% 88%;
+  --color-on-primary-fixed-variant: 258 60% 30%;
+  --color-secondary-container: var(--color-secondary);
+  --color-on-secondary-container: 258 45% 30%;
+  --color-tertiary: 41 100% 23%;
+  --color-tertiary-fixed: 41 100% 79%;
+  --color-on-tertiary-fixed-variant: 41 100% 16%;
+  --color-error-container: 4 100% 92%;
+  --color-on-error-container: 5 100% 29%;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-background: 220 20% 10%;
+  --color-foreground: 200 30% 92%;
+
+  --color-card: 220 15% 14%;
+  --color-card-foreground: 200 30% 92%;
+
+  --color-primary: 258 52% 64%;
+  --color-primary-foreground: 258 100% 98%;
+
+  --color-secondary: 258 20% 18%;
+  --color-secondary-foreground: 258 30% 85%;
+
+  --color-muted: 220 15% 18%;
+  --color-muted-foreground: 200 15% 55%;
+
+  --color-accent: 258 20% 18%;
+  --color-accent-foreground: 258 30% 80%;
+
+  --color-destructive: 0 72% 50%;
+  --color-destructive-foreground: 0 0% 98%;
+
+  --color-border: 220 15% 22%;
+  --color-input: 220 15% 22%;
+  --color-ring: 258 40% 60%;
+
+  --color-success: 142 60% 40%;
+  --color-warning: 38 80% 45%;
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}

@@ -1,0 +1,315 @@
+'use client';
+import { vars } from 'nativewind';
+
+// RGB channel values for Wasla's purple/teal design system.
+// These map gluestack's primitive scale to our semantic palette.
+// primary-500 = vibrant purple hsl(258 52% 54%) = #7c5dfa
+// secondary-500 = soft lavender hsl(258 45% 96%) = #f0eeff
+export const config = {
+  light: vars({
+    /* Primary — vibrant purple */
+    '--color-primary-0': '248 246 255',
+    '--color-primary-50': '240 238 255',
+    '--color-primary-100': '224 218 255',
+    '--color-primary-200': '197 184 253',
+    '--color-primary-300': '164 140 251',
+    '--color-primary-400': '132 100 250',
+    '--color-primary-500': '124 93 250',   /* #7c5dfa — main brand */
+    '--color-primary-600': '107 73 228',
+    '--color-primary-700': '87 55 196',
+    '--color-primary-800': '67 38 160',
+    '--color-primary-900': '49 23 126',
+    '--color-primary-950': '33 12 94',
+
+    /* Secondary — soft lavender */
+    '--color-secondary-0': '255 255 255',
+    '--color-secondary-50': '250 249 255',
+    '--color-secondary-100': '243 241 255',
+    '--color-secondary-200': '236 233 255',
+    '--color-secondary-300': '224 219 255',
+    '--color-secondary-400': '210 202 255',
+    '--color-secondary-500': '240 238 255',   /* lavender tint */
+    '--color-secondary-600': '198 192 240',
+    '--color-secondary-700': '160 152 220',
+    '--color-secondary-800': '120 110 190',
+    '--color-secondary-900': '80 70 155',
+    '--color-secondary-950': '50 40 120',
+
+    /* Tertiary — teal for backgrounds */
+    '--color-tertiary-0': '248 252 252',
+    '--color-tertiary-50': '242 250 250',
+    '--color-tertiary-100': '232 246 246',
+    '--color-tertiary-200': '210 238 238',
+    '--color-tertiary-300': '175 222 222',
+    '--color-tertiary-400': '130 198 198',
+    '--color-tertiary-500': '90 172 172',
+    '--color-tertiary-600': '60 145 145',
+    '--color-tertiary-700': '40 118 118',
+    '--color-tertiary-800': '26 92 92',
+    '--color-tertiary-900': '16 68 68',
+    '--color-tertiary-950': '8 44 44',
+
+    /* Error / Destructive */
+    '--color-error-0': '255 240 240',
+    '--color-error-50': '255 224 224',
+    '--color-error-100': '254 202 202',
+    '--color-error-200': '252 165 165',
+    '--color-error-300': '248 113 113',
+    '--color-error-400': '239 68 68',
+    '--color-error-500': '220 53 53',
+    '--color-error-600': '200 38 38',
+    '--color-error-700': '175 28 28',
+    '--color-error-800': '148 22 22',
+    '--color-error-900': '120 18 18',
+    '--color-error-950': '80 12 12',
+
+    /* Success */
+    '--color-success-0': '236 255 244',
+    '--color-success-50': '210 252 228',
+    '--color-success-100': '167 243 200',
+    '--color-success-200': '110 231 161',
+    '--color-success-300': '60 213 120',
+    '--color-success-400': '30 185 84',
+    '--color-success-500': '22 163 74',
+    '--color-success-600': '18 140 62',
+    '--color-success-700': '15 115 50',
+    '--color-success-800': '12 90 40',
+    '--color-success-900': '9 65 30',
+    '--color-success-950': '5 40 18',
+
+    /* Warning */
+    '--color-warning-0': '255 252 237',
+    '--color-warning-50': '254 249 195',
+    '--color-warning-100': '253 240 138',
+    '--color-warning-200': '252 211 77',
+    '--color-warning-300': '251 191 36',
+    '--color-warning-400': '245 158 11',
+    '--color-warning-500': '217 119 6',
+    '--color-warning-600': '180 83 9',
+    '--color-warning-700': '146 64 14',
+    '--color-warning-800': '120 53 15',
+    '--color-warning-900': '92 40 10',
+    '--color-warning-950': '66 28 6',
+
+    /* Info */
+    '--color-info-0': '240 249 255',
+    '--color-info-50': '224 242 254',
+    '--color-info-100': '186 230 253',
+    '--color-info-200': '125 211 252',
+    '--color-info-300': '56 189 248',
+    '--color-info-400': '14 165 233',
+    '--color-info-500': '2 132 199',
+    '--color-info-600': '3 105 161',
+    '--color-info-700': '7 89 133',
+    '--color-info-800': '12 74 110',
+    '--color-info-900': '12 61 90',
+    '--color-info-950': '8 40 60',
+
+    /* Typography — slate-blue */
+    '--color-typography-0': '255 255 255',
+    '--color-typography-50': '249 250 251',
+    '--color-typography-100': '241 242 244',
+    '--color-typography-200': '224 226 230',
+    '--color-typography-300': '200 204 210',
+    '--color-typography-400': '160 166 175',
+    '--color-typography-500': '120 128 138',
+    '--color-typography-600': '88 98 110',
+    '--color-typography-700': '60 70 82',
+    '--color-typography-800': '38 47 58',
+    '--color-typography-900': '20 28 38',   /* ≈ hsl(199 41% 12%) foreground */
+    '--color-typography-950': '12 18 24',
+
+    /* Outline */
+    '--color-outline-0': '255 255 255',
+    '--color-outline-50': '245 247 249',
+    '--color-outline-100': '232 236 240',
+    '--color-outline-200': '214 221 228',
+    '--color-outline-300': '192 202 212',
+    '--color-outline-400': '163 177 192',
+    '--color-outline-500': '132 150 168',
+    '--color-outline-600': '104 122 142',
+    '--color-outline-700': '78 98 118',
+    '--color-outline-800': '55 76 96',
+    '--color-outline-900': '35 56 76',
+    '--color-outline-950': '20 36 54',
+
+    /* Background */
+    '--color-background-0': '255 255 255',   /* card white */
+    '--color-background-50': '247 251 251',   /* ≈ hsl(180 25% 98%) */
+    '--color-background-100': '236 244 244',
+    '--color-background-200': '218 234 234',
+    '--color-background-300': '195 220 220',
+    '--color-background-400': '165 202 202',
+    '--color-background-500': '132 182 182',
+    '--color-background-600': '100 158 158',
+    '--color-background-700': '74 133 133',
+    '--color-background-800': '52 108 108',
+    '--color-background-900': '34 84 84',
+    '--color-background-950': '18 58 58',
+
+    /* Background Special */
+    '--color-background-error': '255 240 240',
+    '--color-background-warning': '255 250 235',
+    '--color-background-success': '236 255 244',
+    '--color-background-muted': '236 242 242',
+    '--color-background-info': '240 249 255',
+
+    /* Focus Ring */
+    '--color-indicator-primary': '124 93 250',
+    '--color-indicator-info': '14 165 233',
+    '--color-indicator-error': '220 53 53',
+  }),
+  dark: vars({
+    /* Primary — slightly brighter purple in dark */
+    '--color-primary-0': '33 12 94',
+    '--color-primary-50': '49 23 126',
+    '--color-primary-100': '67 38 160',
+    '--color-primary-200': '87 55 196',
+    '--color-primary-300': '107 73 228',
+    '--color-primary-400': '124 93 250',
+    '--color-primary-500': '148 118 252',
+    '--color-primary-600': '172 148 253',
+    '--color-primary-700': '197 180 254',
+    '--color-primary-800': '220 210 255',
+    '--color-primary-900': '238 234 255',
+    '--color-primary-950': '248 246 255',
+
+    /* Secondary */
+    '--color-secondary-0': '25 18 50',
+    '--color-secondary-50': '38 28 70',
+    '--color-secondary-100': '55 42 95',
+    '--color-secondary-200': '75 58 125',
+    '--color-secondary-300': '100 80 158',
+    '--color-secondary-400': '130 108 192',
+    '--color-secondary-500': '160 138 220',
+    '--color-secondary-600': '190 170 240',
+    '--color-secondary-700': '210 198 250',
+    '--color-secondary-800': '228 220 255',
+    '--color-secondary-900': '241 237 255',
+    '--color-secondary-950': '250 248 255',
+
+    /* Tertiary */
+    '--color-tertiary-0': '8 44 44',
+    '--color-tertiary-50': '16 68 68',
+    '--color-tertiary-100': '26 92 92',
+    '--color-tertiary-200': '40 118 118',
+    '--color-tertiary-300': '60 145 145',
+    '--color-tertiary-400': '90 172 172',
+    '--color-tertiary-500': '130 198 198',
+    '--color-tertiary-600': '175 222 222',
+    '--color-tertiary-700': '210 238 238',
+    '--color-tertiary-800': '232 246 246',
+    '--color-tertiary-900': '242 250 250',
+    '--color-tertiary-950': '248 252 252',
+
+    /* Error */
+    '--color-error-0': '80 12 12',
+    '--color-error-50': '120 18 18',
+    '--color-error-100': '148 22 22',
+    '--color-error-200': '175 28 28',
+    '--color-error-300': '200 38 38',
+    '--color-error-400': '220 53 53',
+    '--color-error-500': '239 68 68',
+    '--color-error-600': '248 113 113',
+    '--color-error-700': '252 165 165',
+    '--color-error-800': '254 202 202',
+    '--color-error-900': '255 224 224',
+    '--color-error-950': '255 240 240',
+
+    /* Success */
+    '--color-success-0': '5 40 18',
+    '--color-success-50': '9 65 30',
+    '--color-success-100': '12 90 40',
+    '--color-success-200': '15 115 50',
+    '--color-success-300': '18 140 62',
+    '--color-success-400': '22 163 74',
+    '--color-success-500': '30 185 84',
+    '--color-success-600': '60 213 120',
+    '--color-success-700': '110 231 161',
+    '--color-success-800': '167 243 200',
+    '--color-success-900': '210 252 228',
+    '--color-success-950': '236 255 244',
+
+    /* Warning */
+    '--color-warning-0': '66 28 6',
+    '--color-warning-50': '92 40 10',
+    '--color-warning-100': '120 53 15',
+    '--color-warning-200': '146 64 14',
+    '--color-warning-300': '180 83 9',
+    '--color-warning-400': '217 119 6',
+    '--color-warning-500': '245 158 11',
+    '--color-warning-600': '251 191 36',
+    '--color-warning-700': '252 211 77',
+    '--color-warning-800': '253 240 138',
+    '--color-warning-900': '254 249 195',
+    '--color-warning-950': '255 252 237',
+
+    /* Info */
+    '--color-info-0': '8 40 60',
+    '--color-info-50': '12 61 90',
+    '--color-info-100': '12 74 110',
+    '--color-info-200': '7 89 133',
+    '--color-info-300': '3 105 161',
+    '--color-info-400': '2 132 199',
+    '--color-info-500': '14 165 233',
+    '--color-info-600': '56 189 248',
+    '--color-info-700': '125 211 252',
+    '--color-info-800': '186 230 253',
+    '--color-info-900': '224 242 254',
+    '--color-info-950': '240 249 255',
+
+    /* Typography */
+    '--color-typography-0': '12 18 24',
+    '--color-typography-50': '20 28 38',
+    '--color-typography-100': '38 47 58',
+    '--color-typography-200': '60 70 82',
+    '--color-typography-300': '88 98 110',
+    '--color-typography-400': '120 128 138',
+    '--color-typography-500': '160 166 175',
+    '--color-typography-600': '200 204 210',
+    '--color-typography-700': '224 226 230',
+    '--color-typography-800': '241 242 244',
+    '--color-typography-900': '249 250 251',
+    '--color-typography-950': '255 255 255',
+
+    /* Outline */
+    '--color-outline-0': '20 36 54',
+    '--color-outline-50': '35 56 76',
+    '--color-outline-100': '55 76 96',
+    '--color-outline-200': '78 98 118',
+    '--color-outline-300': '104 122 142',
+    '--color-outline-400': '132 150 168',
+    '--color-outline-500': '163 177 192',
+    '--color-outline-600': '192 202 212',
+    '--color-outline-700': '214 221 228',
+    '--color-outline-800': '232 236 240',
+    '--color-outline-900': '245 247 249',
+    '--color-outline-950': '255 255 255',
+
+    /* Background */
+    '--color-background-0': '18 22 30',
+    '--color-background-50': '24 30 40',
+    '--color-background-100': '30 38 52',
+    '--color-background-200': '40 50 66',
+    '--color-background-300': '55 68 86',
+    '--color-background-400': '74 92 112',
+    '--color-background-500': '98 120 142',
+    '--color-background-600': '130 156 178',
+    '--color-background-700': '168 192 212',
+    '--color-background-800': '202 220 234',
+    '--color-background-900': '228 238 246',
+    '--color-background-950': '245 250 254',
+
+    /* Background Special */
+    '--color-background-error': '60 20 20',
+    '--color-background-warning': '60 40 10',
+    '--color-background-success': '15 45 28',
+    '--color-background-muted': '28 35 45',
+    '--color-background-info': '12 30 50',
+
+    /* Focus Ring */
+    '--color-indicator-primary': '148 118 252',
+    '--color-indicator-info': '56 189 248',
+    '--color-indicator-error': '239 68 68',
+  }),
+};

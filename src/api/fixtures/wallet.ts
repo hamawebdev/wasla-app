@@ -1,0 +1,86 @@
+import type { WalletTransaction } from '../types';
+
+export const MOCK_WALLET_BALANCE = 12500;
+
+export const MOCK_TRANSACTIONS: WalletTransaction[] = [
+  {
+    id: 'tx1',
+    type: 'income',
+    amount: 2500,
+    description: 'دفع مقابل خدمة خياطة وتفصيل — أميرة بن سالم',
+    date: '2026-05-10',
+    status: 'completed',
+  },
+  {
+    id: 'tx2',
+    type: 'topup',
+    amount: 5000,
+    description: 'شحن رصيد عبر BaridiMob',
+    date: '2026-05-08',
+    status: 'completed',
+  },
+  {
+    id: 'tx3',
+    type: 'expense',
+    amount: 500,
+    description: 'رسوم منصة وصلة — مايو 2026',
+    date: '2026-05-05',
+    status: 'completed',
+  },
+  {
+    id: 'tx4',
+    type: 'income',
+    amount: 8000,
+    description: 'دفع مقابل خدمة تجميل — هناء خليل',
+    date: '2026-05-03',
+    status: 'completed',
+  },
+  {
+    id: 'tx5',
+    type: 'withdrawal',
+    amount: 3000,
+    description: 'سحب إلى حساب CCP',
+    date: '2026-04-30',
+    status: 'completed',
+  },
+  {
+    id: 'tx6',
+    type: 'income',
+    amount: 3500,
+    description: 'دفع مقابل خدمة حلويات — زينب الأمين',
+    date: '2026-04-28',
+    status: 'completed',
+  },
+  {
+    id: 'tx7',
+    type: 'topup',
+    amount: 2000,
+    description: 'شحن رصيد عبر BaridiMob',
+    date: '2026-04-25',
+    status: 'completed',
+  },
+  {
+    id: 'tx8',
+    type: 'expense',
+    amount: 250,
+    description: 'رسوم منصة — أبريل 2026',
+    date: '2026-04-20',
+    status: 'completed',
+  },
+  {
+    id: 'tx9',
+    type: 'income',
+    amount: 5000,
+    description: 'دفع مقابل خدمة طبخ — ريم بوزيد',
+    date: '2026-04-18',
+    status: 'completed',
+  },
+  {
+    id: 'tx10',
+    type: 'withdrawal',
+    amount: 10000,
+    description: 'سحب إلى حساب CCP',
+    date: '2026-04-15',
+    status: 'pending',
+  },
+];
