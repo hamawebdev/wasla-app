@@ -1,7 +1,8 @@
 <p align="center">
     <img alt="React Native Template Obytes" src="https://github.com/obytes/react-native-template-obytes/assets/11137944/a8163d23-897a-4efe-91ce-b9bf7348c18f" width="200" />
 </p>
-
+/home/hamawebdev/Android/sdk/emulator/emulator -avd Pixel_API_35 &
+pnpm android
 <h1 align="center">
   React Native Template Obytes
 </h1>
@@ -11,6 +12,7 @@
 📱 A template for your next React Native project 🚀, Made with developer experience and performance first: Expo, TypeScript, TailwindCSS, Husky, Lint-Staged, expo-router, react-query, TanStack Form, I18n.
 
 > Welcome to the Obytes Mobile Tribe's Expo / React Native Starter Kit!
+clear
 
 ## 🚀 Motivation
 

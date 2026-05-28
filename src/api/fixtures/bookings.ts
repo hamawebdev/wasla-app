@@ -25,6 +25,7 @@ export const MOCK_BOOKINGS: Booking[] = [
     address: 'وهران، منطقة الأمير',
     price: 5000,
     status: 'confirmed',
+    trackingStatus: 'on_the_way',
     createdAt: '2026-05-08',
   },
   {
@@ -67,4 +68,12 @@ export const PROVIDER_NAMES: Record<string, string> = {
   p5: 'سارة بن علي',
   p7: 'سميرة حداد',
   p8: 'أسماء بوزيد',
+};
+
+export const CUSTOMER_NAMES: Record<string, string> = {
+  customer: 'أميرة بن علي',
+};
+
+export const CUSTOMER_CITIES: Record<string, string> = {
+  customer: 'الجزائر العاصمة',
 };

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
+import { BookingStepper } from '@/components/wasla/booking-stepper';
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { MOCK_SERVICES } from '@/api/fixtures/services';
 
@@ -23,6 +24,9 @@ export default function BookingConfirmationScreen() {
 
   return (
     <Screen edges={['top', 'bottom']}>
+      <View style={styles.stepperWrapper}>
+        <BookingStepper currentStep={3} />
+      </View>
       <View style={styles.container}>
         {/* Success icon */}
         <View style={styles.successIcon}>
@@ -70,6 +74,7 @@ export default function BookingConfirmationScreen() {
 }
 
 const styles = StyleSheet.create({
+  stepperWrapper: { paddingHorizontal: 20, paddingTop: 12 },
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 24 },
   successIcon: {
     width: 80,

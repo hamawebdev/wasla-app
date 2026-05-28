@@ -1,22 +1,26 @@
 import { useRouter } from 'expo-router';
-import { Plus, Star, TrendingUp, Users } from 'lucide-react-native';
+import { ChevronLeft, Star, TrendingUp, Users } from 'lucide-react-native';
 import * as React from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
-import { MOCK_SERVICES } from '@/api/fixtures/services';
-import { useProviderStore } from '@/features/provider/use-provider-store';
+import { CUSTOMER_NAMES, SERVICE_NAMES } from '@/api/fixtures/bookings';
+import { useBookingsStore } from '@/lib/stores/bookings';
+import type { Booking } from '@/api/types';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
 const DARK = 'hsl(199, 41%, 12%)';
 const DESTRUCTIVE = 'hsl(0, 84%, 60%)';
+const BORDER = 'hsl(198, 21%, 88%)';
 
 const PROVIDER_ID = 'p1';
-const MY_SERVICES = MOCK_SERVICES.filter((s) => s.providerId === PROVIDER_ID);
+const LATEST_LIMIT = 3;
 
 const TODAY = new Date('2026-05-10');
 const ARABIC_DAYS = ['أ', 'ث', 'ر', 'خ', 'ج', 'س', 'أ'];
@@ -29,7 +33,43 @@ const WEEK_DAYS = Array.from({ length: 7 }, (_, i) => {
 export default function ProviderDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { activeToggles, toggleService, isActive } = useProviderStore();
+  const bookings = useBookingsStore((s) => s.bookings);
+
+  const pendingForProvider = bookings.filter(
+    (b) => b.providerId === PROVIDER_ID && b.status === 'pending',
+  );
+  const pendingCount = pendingForProvider.length;
+  const latestReservations = [...pendingForProvider]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, LATEST_LIMIT);
+
+  const renderReservation = (booking: Booking) => {
+    const customerName = CUSTOMER_NAMES[booking.customerId] ?? 'عميلة';
+    return (
+      <Pressable
+        key={booking.id}
+        style={styles.reservationRow}
+        onPress={() => router.push(`/(provider)/client/${booking.customerId}` as any)}
+      >
+        <Avatar name={customerName} size={40} />
+        <View style={styles.reservationInfo}>
+          <Text variant="body" weight="semibold" numberOfLines={1} style={styles.customerName}>
+            {customerName}
+          </Text>
+          <Text variant="caption" numberOfLines={1} style={styles.serviceName}>
+            {SERVICE_NAMES[booking.serviceId] ?? 'خدمة'}
+          </Text>
+          <Text variant="caption" style={styles.dateTime}>
+            {booking.date} — {booking.time}
+          </Text>
+        </View>
+        <View style={styles.reservationTrailing}>
+          <Badge label={t('provider.clients_new')} variant="warning" />
+          <ChevronLeft size={16} color={MUTED} />
+        </View>
+      </Pressable>
+    );
+  };
 
   return (
     <Screen scrollable edges={['top', 'bottom']}>
@@ -41,9 +81,11 @@ export default function ProviderDashboard() {
           </Text>
           <Text variant="caption" style={styles.subtitle}>أم رشيد</Text>
         </View>
-        <View style={styles.newBadge}>
-          <Text style={styles.newBadgeText}>3</Text>
-        </View>
+        {pendingCount > 0 && (
+          <View style={styles.newBadge}>
+            <Text style={styles.newBadgeText}>{pendingCount}</Text>
+          </View>
+        )}
       </View>
 
       {/* Stat cards */}
@@ -51,7 +93,7 @@ export default function ProviderDashboard() {
         <Card style={styles.statCard} elevated>
           <Users size={20} color={DESTRUCTIVE} />
           <Text variant="heading" weight="semibold" style={[styles.statValue, { color: DESTRUCTIVE }]}>
-            3
+            {pendingCount}
           </Text>
           <Text variant="caption" style={styles.statLabel}>{t('provider.new_bookings')}</Text>
         </Card>
@@ -95,67 +137,38 @@ export default function ProviderDashboard() {
           onPress={() => router.push('/(provider)/clients')}
         >
           <Text variant="label" weight="semibold" style={{ color: PRIMARY }}>
-            عرض الطلبات الجديدة (3)
+            عرض الطلبات الجديدة ({pendingCount})
           </Text>
         </Pressable>
       </Card>
 
-      {/* My services */}
+      {/* Latest reservations */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-            {t('provider.my_services')}
+            {t('provider.latest_reservations')}
           </Text>
         </View>
 
-        {MY_SERVICES.length === 0 ? (
-          <Text variant="caption" style={{ textAlign: 'center', color: MUTED, padding: 20 }}>
-            لا توجد خدمات مضافة بعد
+        {latestReservations.length === 0 ? (
+          <Text variant="caption" style={styles.emptyText}>
+            {t('provider.no_new_reservations')}
           </Text>
         ) : (
-          MY_SERVICES.map((service) => {
-            const active = isActive(service.id);
-            return (
-              <Pressable
-                key={service.id}
-                style={styles.serviceRow}
-                onPress={() => router.push(`/(provider)/services/${service.id}` as any)}
-              >
-                <Switch
-                  value={active}
-                  onValueChange={() => toggleService(service.id)}
-                  trackColor={{ false: 'hsl(198, 21%, 88%)', true: 'hsl(258, 52%, 72%)' }}
-                  thumbColor={active ? PRIMARY : '#fff'}
-                />
-                <View style={styles.serviceInfo}>
-                  <Text
-                    variant="body"
-                    weight="medium"
-                    numberOfLines={1}
-                    style={{ textAlign: 'right', color: DARK }}
-                  >
-                    {service.title}
-                  </Text>
-                  <Text variant="caption" style={{ textAlign: 'right', color: MUTED }}>
-                    {service.price.toLocaleString('ar-DZ')} د.ج
-                  </Text>
-                </View>
-              </Pressable>
-            );
-          })
+          latestReservations.map(renderReservation)
         )}
+
+        <Pressable
+          style={styles.showAllBtn}
+          onPress={() => router.push('/(provider)/clients')}
+        >
+          <Text variant="label" weight="semibold" style={{ color: PRIMARY }}>
+            {t('provider.show_all_reservations')}
+          </Text>
+        </Pressable>
       </View>
 
-      {/* Spacer for FAB */}
-      <View style={{ height: 80 }} />
-
-      {/* FAB */}
-      <Pressable
-        style={styles.fab}
-        onPress={() => router.push('/(provider)/services/new')}
-      >
-        <Plus size={24} color="#fff" />
-      </Pressable>
+      <View style={{ height: 24 }} />
     </Screen>
   );
 }
@@ -212,42 +225,40 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: 'hsl(198, 21%, 88%)',
+    borderTopColor: BORDER,
   },
 
   section: { paddingHorizontal: 16, gap: 8 },
   sectionHeader: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { textAlign: 'right', color: DARK, fontSize: 16, marginBottom: 4 },
+  emptyText: { textAlign: 'center', color: MUTED, padding: 20 },
 
-  serviceRow: {
+  reservationRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 12,
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 14,
+    padding: 12,
     shadowColor: 'hsl(196, 22%, 10%)',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
   },
-  serviceInfo: { flex: 1, gap: 2 },
+  reservationInfo: { flex: 1, gap: 2 },
+  customerName: { textAlign: 'right', color: DARK },
+  serviceName: { textAlign: 'right', color: MUTED },
+  dateTime: { textAlign: 'right', color: MUTED, fontSize: 11 },
+  reservationTrailing: { alignItems: 'flex-end', gap: 6 },
 
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    start: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: PRIMARY,
+  showAllBtn: {
+    marginTop: 8,
+    paddingVertical: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: PRIMARY,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: PRIMARY,
+    backgroundColor: '#fff',
   },
 });

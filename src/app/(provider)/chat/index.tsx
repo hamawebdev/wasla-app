@@ -8,7 +8,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { SegmentedControl } from '@/components/wasla/segmented-control';
-import { MOCK_THREADS } from '@/api/fixtures/chats';
+import { useBookingsStore } from '@/lib/stores/bookings';
 import type { ChatThread } from '@/api/types';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -18,10 +18,11 @@ export default function ProviderChatListScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState('all');
+  const allThreads = useBookingsStore((s) => s.threads);
 
   const threads = tab === 'bookings'
-    ? MOCK_THREADS.filter((th) => !!th.bookingId)
-    : MOCK_THREADS;
+    ? allThreads.filter((th) => !!th.bookingId)
+    : allThreads;
 
   const renderThread = ({ item }: { item: ChatThread }) => (
     <Pressable

@@ -11,8 +11,9 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { SegmentedControl } from '@/components/wasla/segmented-control';
-import { MOCK_BOOKINGS, PROVIDER_NAMES, SERVICE_NAMES } from '@/api/fixtures/bookings';
-import type { Booking, BookingStatus } from '@/api/types';
+import { CUSTOMER_NAMES, SERVICE_NAMES } from '@/api/fixtures/bookings';
+import { useBookingsStore } from '@/lib/stores/bookings';
+import type { Booking } from '@/api/types';
 import { EmptyCalendarIllustration } from '@/components/illustrations';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -21,10 +22,6 @@ const DARK = 'hsl(199, 41%, 12%)';
 const BORDER = 'hsl(198, 21%, 88%)';
 const SUCCESS = 'hsl(142, 71%, 45%)';
 const DESTRUCTIVE = 'hsl(0, 84%, 60%)';
-
-const CUSTOMER_NAMES: Record<string, string> = {
-  customer: 'أميرة بن علي',
-};
 
 const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'muted' | 'destructive'> = {
   pending: 'warning',
@@ -44,26 +41,25 @@ export default function ClientsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState('new');
-  const [bookingStatuses, setBookingStatuses] = useState<Record<string, BookingStatus>>({});
+  const bookings = useBookingsStore((s) => s.bookings);
+  const acceptBooking = useBookingsStore((s) => s.acceptBooking);
+  const rejectBooking = useBookingsStore((s) => s.rejectBooking);
 
-  const getStatus = (b: Booking): BookingStatus =>
-    (bookingStatuses[b.id] as BookingStatus) ?? b.status;
-
-  const filtered = MOCK_BOOKINGS.filter((b) => {
-    const status = getStatus(b);
-    if (tab === 'new') return status === 'pending';
-    if (tab === 'current') return status === 'confirmed';
-    return status === 'completed' || status === 'cancelled';
+  const filtered = bookings.filter((b) => {
+    if (tab === 'new') return b.status === 'pending';
+    if (tab === 'current') return b.status === 'confirmed';
+    return b.status === 'completed' || b.status === 'cancelled';
   });
 
-  const accept = (id: string) =>
-    setBookingStatuses((prev) => ({ ...prev, [id]: 'confirmed' }));
+  const accept = (id: string) => {
+    const threadId = acceptBooking(id);
+    if (threadId) router.push(`/(provider)/chat/${threadId}` as any);
+  };
 
-  const reject = (id: string) =>
-    setBookingStatuses((prev) => ({ ...prev, [id]: 'cancelled' }));
+  const reject = (id: string) => rejectBooking(id);
 
   const renderBooking = ({ item }: { item: Booking }) => {
-    const status = getStatus(item);
+    const status = item.status;
     return (
       <View style={styles.card}>
         <View style={styles.cardTop}>

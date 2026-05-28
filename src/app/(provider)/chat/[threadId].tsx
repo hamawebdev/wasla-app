@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/components/ui/text';
-import { MOCK_MESSAGES, MOCK_THREADS } from '@/api/fixtures/chats';
+import { useBookingsStore } from '@/lib/stores/bookings';
 import type { Message } from '@/api/types';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -53,10 +53,11 @@ export default function ProviderChatRoomScreen() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  const thread = MOCK_THREADS.find((th) => th.id === threadId);
-  const [messages, setMessages] = useState<Message[]>(
-    MOCK_MESSAGES[threadId ?? ''] ?? []
+  const thread = useBookingsStore((s) => s.threads.find((th) => th.id === threadId));
+  const initialMessages = useBookingsStore(
+    (s) => s.messages[threadId ?? ''] ?? [],
   );
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [inputText, setInputText] = useState('');
   const [showActions, setShowActions] = useState(false);
   const [isSending, setIsSending] = useState(false);

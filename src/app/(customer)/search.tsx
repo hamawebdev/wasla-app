@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowRight, SlidersHorizontal } from 'lucide-react-native';
+import { ArrowRight, ChevronLeft, LayoutGrid, SlidersHorizontal } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
@@ -15,8 +15,10 @@ import { Text } from '@/components/ui/text';
 import { ServiceCard } from '@/components/wasla/service-card';
 import { SearchBar } from '@/components/wasla/search-bar';
 import type { SearchFilters } from '@/api/types';
+import { CATEGORIES } from '@/api/fixtures/categories';
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { useSearchServices } from '@/api/services/use-services';
+import { CategorySheet } from '@/components/wasla/category-sheet';
 import { FilterSheet } from '@/components/wasla/filter-sheet';
 
 const SORT_OPTIONS = [
@@ -33,24 +35,34 @@ export default function SearchScreen() {
 
   const [query, setQuery] = useState(params.q ?? '');
   const [sortBy, setSortBy] = useState<SearchFilters['sortBy']>('distance');
+  const [categoryId, setCategoryId] = useState<string | undefined>(params.categoryId);
   const [filters, setFilters] = useState<Partial<SearchFilters>>({});
   const [filterOpen, setFilterOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
   const activeFilters: SearchFilters = {
     query,
     sortBy,
-    categoryId: params.categoryId,
+    categoryId,
     ...filters,
   };
 
   const { data: results, isLoading } = useSearchServices(activeFilters);
 
+  const activeCategoryLabel = CATEGORIES.find((c) => c.id === categoryId)?.label;
+
   const activeChips = [
+    activeCategoryLabel && { key: 'category', label: activeCategoryLabel },
     sortBy !== 'distance' && { key: 'sort', label: SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? '' },
     filters.maxPrice && { key: 'price', label: `حتى ${filters.maxPrice?.toLocaleString('ar-DZ')} د.ج` },
     filters.maxDistance && { key: 'dist', label: `ضمن ${filters.maxDistance} كم` },
     filters.minRating && { key: 'rating', label: `${filters.minRating}+ نجوم` },
   ].filter(Boolean) as { key: string; label: string }[];
+
+  const categoryChips = React.useMemo(
+    () => [{ id: 'all', label: 'الكل' }, ...CATEGORIES.map((c) => ({ id: c.id, label: c.label }))],
+    [],
+  );
 
   return (
     <Screen edges={['top', 'bottom']}>
@@ -69,6 +81,29 @@ export default function SearchScreen() {
         </View>
       </View>
 
+      {/* Category chips */}
+      <View style={styles.categoryRow}>
+        <FlatList
+          data={categoryChips}
+          keyExtractor={(c) => c.id}
+          horizontal
+          inverted
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipList}
+          renderItem={({ item }) => {
+            const isAll = item.id === 'all';
+            const selected = isAll ? !categoryId : categoryId === item.id;
+            return (
+              <Chip
+                label={item.label}
+                selected={selected}
+                onPress={() => setCategoryId(isAll ? undefined : item.id)}
+              />
+            );
+          }}
+        />
+      </View>
+
       {/* Sort + filter chips */}
       {activeChips.length > 0 && (
         <View style={styles.chipRow}>
@@ -84,7 +119,8 @@ export default function SearchScreen() {
                 label={item.label}
                 selected
                 onRemove={() => {
-                  if (item.key === 'sort') setSortBy('distance');
+                  if (item.key === 'category') setCategoryId(undefined);
+                  else if (item.key === 'sort') setSortBy('distance');
                   else if (item.key === 'price') setFilters((f) => ({ ...f, maxPrice: undefined }));
                   else if (item.key === 'dist') setFilters((f) => ({ ...f, maxDistance: undefined }));
                   else if (item.key === 'rating') setFilters((f) => ({ ...f, minRating: undefined }));
@@ -94,6 +130,27 @@ export default function SearchScreen() {
           />
         </View>
       )}
+
+      {/* Category trigger (opens standalone searchable sheet) */}
+      <Pressable
+        onPress={() => setCategoryOpen(true)}
+        style={styles.categoryTrigger}
+        accessibilityRole="button"
+        accessibilityLabel={t('search.choose_category')}
+      >
+        <View style={styles.categoryTriggerLeading}>
+          <LayoutGrid size={18} color="hsl(258, 52%, 54%)" />
+          <Text variant="label" weight="medium" style={styles.categoryTriggerLabel}>
+            {t('search.choose_category')}
+          </Text>
+        </View>
+        <View style={styles.categoryTriggerTrailing}>
+          <Text variant="body" style={styles.categoryTriggerValue} numberOfLines={1}>
+            {activeCategoryLabel ?? t('search.all_categories')}
+          </Text>
+          <ChevronLeft size={18} color="hsl(198, 15%, 45%)" />
+        </View>
+      </Pressable>
 
       {/* Sort row */}
       <View style={styles.sortRow}>
@@ -142,6 +199,13 @@ export default function SearchScreen() {
         filters={filters}
         onApply={(f) => { setFilters(f); setFilterOpen(false); }}
       />
+
+      <CategorySheet
+        isOpen={categoryOpen}
+        selectedId={categoryId}
+        onClose={() => setCategoryOpen(false)}
+        onSelect={(id) => setCategoryId(id)}
+      />
     </Screen>
   );
 }
@@ -151,8 +215,28 @@ const styles = StyleSheet.create({
   backBtn: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   searchWrapper: { flex: 1 },
 
+  categoryRow: { paddingHorizontal: 12, paddingTop: 4 },
   chipRow: { paddingHorizontal: 12 },
   chipList: { gap: 8, paddingVertical: 6 },
+
+  categoryTrigger: {
+    marginHorizontal: 12,
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'hsl(198, 21%, 88%)',
+    backgroundColor: '#fff',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  categoryTriggerLeading: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  categoryTriggerLabel: { color: 'hsl(258, 52%, 54%)' },
+  categoryTriggerTrailing: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, flexShrink: 1 },
+  categoryTriggerValue: { color: 'hsl(199, 41%, 12%)', maxWidth: 160 },
 
   sortRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 12, paddingBottom: 8, gap: 8 },
   filterBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, minHeight: 36 },

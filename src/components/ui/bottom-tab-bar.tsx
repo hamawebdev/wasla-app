@@ -1,5 +1,14 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Home, MessageCircle, Package, Plus, Search, User } from 'lucide-react-native';
+import { useRouter, useSegments } from 'expo-router';
+import {
+  CalendarDays,
+  Home,
+  MessageCircle,
+  Package,
+  Plus,
+  Search,
+  User,
+} from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,50 +22,45 @@ const TAB_BG = '#ffffff';
 interface TabConfig {
   name: string;
   label: string;
+  href: string;
   Icon: React.ComponentType<{ size: number; color: string; fill?: string; strokeWidth?: number }>;
   isAction?: boolean;
 }
 
 const CUSTOMER_TABS: TabConfig[] = [
-  { name: 'index', label: 'الرئيسية', Icon: Home },
-  { name: 'search', label: 'البحث', Icon: Search },
-  { name: 'chat', label: 'المحادثات', Icon: MessageCircle },
-  { name: 'profile', label: 'حسابي', Icon: User },
+  { name: 'index', label: 'الرئيسية', href: '/(customer)/', Icon: Home },
+  { name: 'search', label: 'البحث', href: '/(customer)/search', Icon: Search },
+  { name: 'bookings', label: 'حجوزاتي', href: '/(customer)/bookings', Icon: CalendarDays },
+  { name: 'chat', label: 'المحادثات', href: '/(customer)/chat', Icon: MessageCircle },
+  { name: 'profile', label: 'حسابي', href: '/(customer)/profile', Icon: User },
 ];
 
 const PROVIDER_TABS: TabConfig[] = [
-  { name: 'index', label: 'لوحتي', Icon: Home },
-  { name: 'services', label: 'خدماتي', Icon: Package },
-  { name: 'add', label: 'إضافة', Icon: Plus, isAction: true },
-  { name: 'chat', label: 'المحادثات', Icon: MessageCircle },
-  { name: 'profile', label: 'حسابي', Icon: User },
+  { name: 'index', label: 'لوحتي', href: '/(provider)/', Icon: Home },
+  { name: 'services', label: 'خدماتي', href: '/(provider)/services', Icon: Package },
+  { name: 'add', label: 'إضافة', href: '', Icon: Plus, isAction: true },
+  { name: 'chat', label: 'المحادثات', href: '/(provider)/chat', Icon: MessageCircle },
+  { name: 'profile', label: 'حسابي', href: '/(provider)/profile', Icon: User },
 ];
 
-export function WaslaTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function WaslaTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const segments = useSegments() as string[];
   const [sheetVisible, setSheetVisible] = useState(false);
 
-  const isProvider = state.routes.some((r) => r.name === 'services');
+  const isProvider =
+    segments.includes('(provider)') || state.routes.some((r) => r.name === 'services');
   const tabs = isProvider ? PROVIDER_TABS : CUSTOMER_TABS;
 
-  // Build a flat list that interleaves the action button for provider
-  const routeTabs = isProvider
-    ? (() => {
-        // Provider real routes: index, services, chat, profile (add is phantom)
-        const realRoutes = state.routes.filter((r) => r.name !== 'add');
-        // Map PROVIDER_TABS order
-        return PROVIDER_TABS.map((tab) => {
-          if (tab.isAction) return { tab, route: null, index: -1 };
-          const routeIdx = realRoutes.findIndex((r) => r.name === tab.name);
-          return { tab, route: realRoutes[routeIdx] ?? null, index: routeIdx };
-        });
-      })()
-    : tabs.map((tab, i) => ({ tab, route: state.routes[i] ?? null, index: i }));
+  // Active tab: prefer the navigator's current route name; for the home tab the
+  // segment after the group is empty, so fall back to "index" when nothing is set.
+  const activeRouteName = state.routes[state.index]?.name ?? 'index';
 
   return (
     <>
       <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        {routeTabs.map(({ tab, route, index }) => {
+        {tabs.map((tab) => {
           if (tab.isAction) {
             return (
               <Pressable
@@ -76,30 +80,36 @@ export function WaslaTabBar({ state, descriptors, navigation }: BottomTabBarProp
             );
           }
 
-          if (!route) return null;
-
-          const { options } = descriptors[route.key] ?? {};
-          const isFocused = state.index === state.routes.indexOf(route);
+          const isFocused = activeRouteName === tab.name;
           const { Icon, label } = tab;
 
           const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+            if (isFocused) return;
+            // Prefer the navigator's tabPress flow when the route is registered,
+            // so the navigator's preserve-state behavior kicks in. Otherwise fall
+            // back to router.push so hidden routes still navigate.
+            const registered = state.routes.find((r) => r.name === tab.name);
+            if (registered) {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: registered.key,
+                canPreventDefault: true,
+              });
+              if (!event.defaultPrevented) {
+                navigation.navigate(registered.name);
+              }
+            } else {
+              router.push(tab.href as any);
             }
           };
 
           return (
             <Pressable
-              key={route.key}
+              key={tab.name}
               onPress={onPress}
               style={styles.tab}
               accessibilityRole="button"
-              accessibilityLabel={options?.tabBarAccessibilityLabel ?? label}
+              accessibilityLabel={label}
               accessibilityState={isFocused ? { selected: true } : {}}
             >
               <Icon

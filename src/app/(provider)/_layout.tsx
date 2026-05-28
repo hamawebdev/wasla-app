@@ -13,6 +13,7 @@ export default function ProviderLayout() {
       <Tabs.Screen name="chat" />
       <Tabs.Screen name="profile" />
       <Tabs.Screen name="clients" options={{ href: null }} />
+      <Tabs.Screen name="client" options={{ href: null }} />
       <Tabs.Screen name="promote" options={{ href: null }} />
     </Tabs>
   );

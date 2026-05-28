@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
+import { BookingStepper } from '@/components/wasla/booking-stepper';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -28,6 +29,7 @@ export default function BookingStep1() {
   return (
     <Screen scrollable edges={['top', 'bottom']}>
       <View style={styles.container}>
+        <BookingStepper currentStep={1} />
         <Text variant="heading" weight="semibold" style={styles.title}>
           {t('booking.select_date')}
         </Text>

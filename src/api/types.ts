@@ -58,6 +58,9 @@ export type Review = z.infer<typeof ReviewSchema>;
 export const BookingStatusSchema = z.enum(['pending', 'confirmed', 'completed', 'cancelled']);
 export type BookingStatus = z.infer<typeof BookingStatusSchema>;
 
+export const TrackingStatusSchema = z.enum(['accepted', 'on_the_way', 'arrived']);
+export type TrackingStatus = z.infer<typeof TrackingStatusSchema>;
+
 export const BookingSchema = z.object({
   id: z.string(),
   serviceId: z.string(),
@@ -69,6 +72,7 @@ export const BookingSchema = z.object({
   address: z.string().optional(),
   price: z.number(),
   status: BookingStatusSchema,
+  trackingStatus: TrackingStatusSchema.optional(),
   createdAt: z.string(),
 });
 export type Booking = z.infer<typeof BookingSchema>;

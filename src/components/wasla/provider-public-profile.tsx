@@ -1,61 +1,61 @@
 import { useRouter } from 'expo-router';
-import { BadgeCheck, MapPin, MessageCircle, ShoppingBag, Star, Store } from 'lucide-react-native';
+import { BadgeCheck, MapPin, Star } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  FlatList,
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Text } from '@/components/ui/text';
 import { StarRating } from '@/components/ui/star-rating';
-import { ServiceCard } from '@/components/wasla/service-card';
-import { SegmentedControl } from '@/components/wasla/segmented-control';
+import { Text } from '@/components/ui/text';
 import { useProviderById, useServices, useServiceReviews } from '@/api/services/use-services';
-import { MOCK_SERVICES } from '@/api/fixtures/services';
-import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
+const PRIMARY_CONTAINER = 'hsl(258, 80%, 92%)';
+const SECONDARY_CONTAINER = 'hsl(265, 90%, 92%)';
+const TERTIARY = 'hsl(45, 100%, 35%)';
 const MUTED = 'hsl(198, 15%, 45%)';
 const BG = 'hsl(180, 25%, 98%)';
+const SURFACE = '#fff';
+const SURFACE_LOW = 'hsl(280, 33%, 97%)';
 const BORDER = 'hsl(198, 21%, 88%)';
+
+const COVER_IMAGE = 'https://picsum.photos/seed/wasla-cover/800/400';
+
+const TABS = [
+  { key: 'services', label: 'الخدمات' },
+  { key: 'reviews', label: 'التقييمات' },
+  { key: 'about', label: 'حول' },
+] as const;
+
+type TabKey = (typeof TABS)[number]['key'];
 
 interface Props {
   providerId: string;
   mode?: 'public' | 'preview';
 }
 
-const TABS = [
-  { key: 'services', label: 'الخدمات' },
-  { key: 'reviews', label: 'التقييمات' },
-  { key: 'about', label: 'عن المتجر' },
-];
-
 export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('services');
+  const [activeTab, setActiveTab] = useState<TabKey>('services');
 
   const { data: provider } = useProviderById(providerId);
   const { data: allServices = [] } = useServices();
 
   const providerServices = allServices.filter((s) => s.providerId === providerId);
-
-  // Aggregate reviews across services
   const firstServiceId = providerServices[0]?.id ?? '';
   const { data: reviews = [] } = useServiceReviews(firstServiceId);
 
   if (!provider) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.loading}>
         <Text variant="body" style={{ color: MUTED }}>جارٍ التحميل...</Text>
       </View>
     );
@@ -65,7 +65,6 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
 
   return (
     <View style={styles.container}>
-      {/* Preview banner */}
       {mode === 'preview' && (
         <View style={styles.previewBanner}>
           <Text variant="caption" weight="medium" style={styles.previewText}>
@@ -74,12 +73,17 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
         </View>
       )}
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Cover */}
-        <View style={styles.cover} />
-
-        {/* Avatar row */}
-        <View style={styles.avatarSection}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[4]}
+      >
+        {/* Cover + Avatar */}
+        <View style={styles.heroWrap}>
+          <View style={styles.cover}>
+            <Image source={{ uri: COVER_IMAGE }} style={styles.coverImage} />
+          </View>
           <View style={styles.avatarBorder}>
             <Avatar
               source={provider.avatar ? { uri: provider.avatar } : undefined}
@@ -87,76 +91,123 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
               size={80}
             />
           </View>
-          <View style={styles.providerInfo}>
-            <View style={styles.nameRow}>
-              {provider.verified && (
-                <BadgeCheck size={18} color={PRIMARY} />
-              )}
-              <Text variant="heading" weight="bold" style={styles.providerName}>
-                {provider.name}
-              </Text>
-            </View>
-            <View style={styles.cityRow}>
-              <MapPin size={14} color={MUTED} />
-              <Text variant="caption" style={{ color: MUTED }}>{provider.city}</Text>
-            </View>
+        </View>
+
+        {/* Provider Info */}
+        <View style={styles.providerInfo}>
+          <View style={styles.nameRow}>
+            <Text variant="heading" weight="bold" style={styles.providerName}>
+              {provider.name}
+            </Text>
+            {provider.verified && <BadgeCheck size={20} color={PRIMARY} fill={PRIMARY} stroke="#fff" />}
+          </View>
+          <View style={styles.cityRow}>
+            <MapPin size={14} color={MUTED} />
+            <Text variant="caption" style={{ color: MUTED }}>{provider.city}</Text>
           </View>
         </View>
 
-        {/* Stats card */}
-        <Card elevated style={styles.statsCard}>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text variant="heading" weight="bold" style={styles.statValue}>
-                {providerServices.length}
-              </Text>
-              <Text variant="caption" style={{ color: MUTED, textAlign: 'center' }}>خدمة</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
+        {/* Stats Bento */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statTile}>
+            <Text variant="heading" weight="bold" style={styles.statValue}>
+              {providerServices.length}
+            </Text>
+            <Text variant="caption" style={styles.statLabel}>خدمة</Text>
+          </View>
+          <View style={styles.statTile}>
+            <View style={styles.ratingRow}>
               <Text variant="heading" weight="bold" style={styles.statValue}>
                 {provider.rating}
               </Text>
-              <Text variant="caption" style={{ color: MUTED, textAlign: 'center' }}>تقييم</Text>
+              <Star size={16} color={TERTIARY} fill={TERTIARY} />
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text variant="heading" weight="bold" style={styles.statValue}>95%</Text>
-              <Text variant="caption" style={{ color: MUTED, textAlign: 'center' }}>استجابة</Text>
-            </View>
+            <Text variant="caption" style={styles.statLabel}>التقييم</Text>
           </View>
-        </Card>
-
-        {/* Tabs */}
-        <View style={styles.tabsWrapper}>
-          <SegmentedControl
-            segments={TABS}
-            selected={activeTab}
-            onChange={setActiveTab}
-          />
+          <View style={styles.statTile}>
+            <Text variant="heading" weight="bold" style={styles.statValue}>95%</Text>
+            <Text variant="caption" style={styles.statLabel}>الاستجابة</Text>
+          </View>
         </View>
 
-        {/* Services tab */}
+        {/* Bio */}
+        {provider.bio && (
+          <View style={styles.bioSection}>
+            <Text variant="body" style={styles.bioText}>{provider.bio}</Text>
+          </View>
+        )}
+
+        {/* Sticky Tabs */}
+        <View style={styles.tabsBar}>
+          {TABS.map((tab) => {
+            const active = activeTab === tab.key;
+            return (
+              <Pressable
+                key={tab.key}
+                style={styles.tabBtn}
+                onPress={() => setActiveTab(tab.key)}
+              >
+                <Text
+                  variant="label"
+                  weight={active ? 'semibold' : 'medium'}
+                  style={[styles.tabLabel, active && styles.tabLabelActive]}
+                >
+                  {tab.label}
+                </Text>
+                {active && <View style={styles.tabIndicator} />}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* Tab content */}
         {activeTab === 'services' && (
-          <View style={styles.tabContent}>
+          <View style={styles.servicesGrid}>
             {providerServices.length === 0 && (
-              <Text variant="body" style={{ color: MUTED, textAlign: 'center', marginTop: 16 }}>
-                لا توجد خدمات بعد
-              </Text>
+              <Text variant="body" style={styles.emptyText}>لا توجد خدمات بعد</Text>
             )}
             {providerServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+              <Pressable
+                key={service.id}
+                style={styles.serviceCard}
+                onPress={() => router.push(`/(customer)/service/${service.id}`)}
+              >
+                <View style={styles.serviceImageWrap}>
+                  {service.images?.[0] ? (
+                    <Image source={{ uri: service.images[0] }} style={styles.serviceImage} />
+                  ) : (
+                    <View style={[styles.serviceImage, { backgroundColor: SURFACE_LOW }]} />
+                  )}
+                  {service.featured && (
+                    <View style={styles.serviceBadge}>
+                      <Text variant="caption" weight="medium" style={styles.serviceBadgeText}>
+                        مطلوب بكثرة
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <View style={styles.serviceBody}>
+                  <Text
+                    variant="label"
+                    weight="medium"
+                    numberOfLines={2}
+                    style={styles.serviceTitle}
+                  >
+                    {service.title}
+                  </Text>
+                  <Text variant="caption" weight="medium" style={styles.servicePrice}>
+                    {service.priceFrom ? 'من ' : ''}{service.price} د.ج
+                  </Text>
+                </View>
+              </Pressable>
             ))}
           </View>
         )}
 
-        {/* Reviews tab */}
         {activeTab === 'reviews' && (
           <View style={styles.tabContent}>
             {reviews.length === 0 && (
-              <Text variant="body" style={{ color: MUTED, textAlign: 'center', marginTop: 16 }}>
-                لا توجد تقييمات بعد
-              </Text>
+              <Text variant="body" style={styles.emptyText}>لا توجد تقييمات بعد</Text>
             )}
             {reviews.map((review) => (
               <Card key={review.id} style={styles.reviewCard}>
@@ -180,7 +231,6 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
           </View>
         )}
 
-        {/* About tab */}
         {activeTab === 'about' && (
           <View style={styles.tabContent}>
             <Card>
@@ -194,11 +244,9 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
           </View>
         )}
 
-        {/* Spacer for sticky bottom */}
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Sticky bottom CTA — hidden in preview mode */}
       {mode === 'public' && (
         <View style={styles.stickyBottom}>
           <Button
@@ -225,6 +273,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   previewBanner: {
     backgroundColor: PRIMARY,
     paddingVertical: 8,
@@ -233,34 +282,113 @@ const styles = StyleSheet.create({
   },
   previewText: { color: '#fff' },
   scroll: { flex: 1 },
-  cover: { height: 150 },
-  avatarSection: {
-    flexDirection: 'row-reverse',
-    alignItems: 'flex-end',
-    paddingHorizontal: 20,
-    marginTop: -40,
-    gap: 14,
-  },
+  scrollContent: { paddingBottom: 16 },
+
+  heroWrap: { position: 'relative' },
+  cover: { height: 180, width: '100%', overflow: 'hidden', backgroundColor: PRIMARY_CONTAINER },
+  coverImage: { ...StyleSheet.absoluteFillObject, opacity: 0.6, resizeMode: 'cover' },
   avatarBorder: {
-    borderWidth: 4,
-    borderColor: '#fff',
+    position: 'absolute',
+    bottom: -40,
+    right: 16,
+    width: 88,
+    height: 88,
     borderRadius: 44,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 4,
+    borderColor: SURFACE,
+    backgroundColor: SURFACE_LOW,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  providerInfo: { flex: 1, paddingBottom: 6, gap: 4 },
+
+  providerInfo: { paddingHorizontal: 16, paddingTop: 52, paddingBottom: 8 },
   nameRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  providerName: { color: FOREGROUND, textAlign: 'right', fontSize: 20 },
-  cityRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
-  statsCard: { margin: 16, padding: 0, paddingVertical: 4 },
-  statsRow: { flexDirection: 'row-reverse', alignItems: 'center' },
-  statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
+  providerName: { color: FOREGROUND, textAlign: 'right', fontSize: 22 },
+  cityRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 4 },
+
+  statsGrid: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  statTile: {
+    flex: 1,
+    backgroundColor: SURFACE_LOW,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ratingRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
   statValue: { color: PRIMARY, fontSize: 22 },
-  statDivider: { width: 1, height: 40, backgroundColor: BORDER },
-  tabsWrapper: { paddingHorizontal: 16, marginBottom: 8 },
-  tabContent: { paddingHorizontal: 16, gap: 12 },
+  statLabel: { color: MUTED, marginTop: 2, fontSize: 12 },
+
+  bioSection: { paddingHorizontal: 16, paddingVertical: 8 },
+  bioText: { color: MUTED, textAlign: 'right', lineHeight: 26 },
+
+  tabsBar: {
+    flexDirection: 'row-reverse',
+    backgroundColor: BG,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    marginTop: 8,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabLabel: { color: MUTED, fontSize: 14 },
+  tabLabelActive: { color: PRIMARY },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: PRIMARY,
+  },
+
+  servicesGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  serviceCard: {
+    width: '47%',
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    overflow: 'hidden',
+  },
+  serviceImageWrap: { height: 120, width: '100%', position: 'relative' },
+  serviceImage: { width: '100%', height: '100%', resizeMode: 'cover' },
+  serviceBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: SECONDARY_CONTAINER,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  serviceBadgeText: { color: PRIMARY, fontSize: 10 },
+  serviceBody: { padding: 10, gap: 6 },
+  serviceTitle: { color: FOREGROUND, textAlign: 'right', minHeight: 36 },
+  servicePrice: { color: PRIMARY },
+
+  tabContent: { paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
+  emptyText: { color: MUTED, textAlign: 'center', marginTop: 16 },
+
   reviewCard: { gap: 10 },
   reviewHeader: {
     flexDirection: 'row-reverse',
@@ -269,11 +397,12 @@ const styles = StyleSheet.create({
   },
   reviewMeta: { gap: 2 },
   aboutTitle: { color: FOREGROUND, textAlign: 'right', marginBottom: 8 },
+
   stickyBottom: {
     flexDirection: 'row-reverse',
     gap: 12,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: SURFACE,
     borderTopWidth: 1,
     borderTopColor: BORDER,
   },

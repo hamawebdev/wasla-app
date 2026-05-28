@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowRight, Calendar, Heart, Share2 } from 'lucide-react-native';
+import { ArrowRight, Calendar, ChevronLeft, Heart, MapPin, Share2, Star } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -71,26 +71,49 @@ export default function ServiceDetailScreen() {
           {/* Provider bar */}
           {provider && (
             <Card style={styles.providerBar}>
-              <View style={styles.providerRow}>
-                <Pressable
-                  style={styles.viewStore}
-                  onPress={() => {}}
-                >
-                  <Text variant="label" style={styles.viewStoreText}>{t('service.view_store')}</Text>
-                </Pressable>
-                <View style={styles.providerInfo}>
-                  {provider.verified && <Badge label="موثّق" variant="primary" />}
-                  <Text variant="body" weight="semibold" style={{ color: 'hsl(199, 41%, 12%)' }}>
-                    {provider.name}
-                  </Text>
+              <Pressable
+                style={styles.providerRow}
+                onPress={() => router.push(`/(customer)/provider/${provider.id}`)}
+              >
+                <View style={styles.avatarRing}>
+                  <Avatar
+                    source={provider.avatar ? { uri: provider.avatar } : undefined}
+                    name={provider.name}
+                    size={60}
+                    online={provider.online}
+                  />
                 </View>
-                <Avatar
-                  source={provider.avatar ? { uri: provider.avatar } : undefined}
-                  name={provider.name}
-                  size={48}
-                  online={provider.online}
-                />
-              </View>
+                <View style={styles.providerInfo}>
+                  <View style={styles.providerNameRow}>
+                    {provider.verified && (
+                      <Badge label={t('common.verified')} variant="primary" />
+                    )}
+                    <Text variant="body" weight="semibold" style={styles.providerName}>
+                      {provider.name}
+                    </Text>
+                  </View>
+                  <View style={styles.providerMeta}>
+                    <Star size={13} color="hsl(38, 92%, 50%)" fill="hsl(38, 92%, 50%)" />
+                    <Text variant="caption" weight="medium" style={styles.providerRating}>
+                      {provider.rating.toFixed(1)}
+                    </Text>
+                    <Text variant="caption" style={styles.providerMetaMuted}>
+                      ({provider.reviewCount})
+                    </Text>
+                    <View style={styles.metaDot} />
+                    <MapPin size={12} color={MUTED} />
+                    <Text variant="caption" style={styles.providerMetaMuted} numberOfLines={1}>
+                      {provider.city}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.viewStore}>
+                  <Text variant="label" weight="medium" style={styles.viewStoreText}>
+                    {t('service.view_store')}
+                  </Text>
+                  <ChevronLeft size={16} color={PRIMARY} />
+                </View>
+              </Pressable>
             </Card>
           )}
 
@@ -225,8 +248,41 @@ const styles = StyleSheet.create({
 
   providerBar: { padding: 14 },
   providerRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
-  providerInfo: { flex: 1, gap: 4, alignItems: 'flex-end' },
-  viewStore: { minHeight: 32 },
+  avatarRing: {
+    padding: 3,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: 'hsl(258, 52%, 88%)',
+    backgroundColor: '#fff',
+  },
+  providerInfo: { flex: 1, gap: 6, alignItems: 'flex-end' },
+  providerNameRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 8,
+  },
+  providerName: { color: 'hsl(199, 41%, 12%)', fontSize: 16 },
+  providerMeta: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    flexWrap: 'wrap',
+  },
+  providerRating: { color: 'hsl(199, 41%, 18%)' },
+  providerMetaMuted: { color: MUTED },
+  metaDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: 'hsl(198, 15%, 70%)',
+    marginHorizontal: 4,
+  },
+  viewStore: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 2,
+    minHeight: 32,
+  },
   viewStoreText: { color: PRIMARY },
 
   serviceTitle: { textAlign: 'right', fontSize: 22, color: 'hsl(199, 41%, 12%)' },

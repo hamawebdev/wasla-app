@@ -2,17 +2,15 @@ import { useRouter } from 'expo-router';
 import { Bell, MapPin } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Chip } from '@/components/ui/chip';
 import { Screen } from '@/components/ui/screen';
 import { ScreenSkeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { ServiceCard } from '@/components/wasla/service-card';
 import { SearchBar } from '@/components/wasla/search-bar';
 import { SegmentedControl } from '@/components/wasla/segmented-control';
-import { CATEGORIES } from '@/api/fixtures/categories';
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { useServices, useFeaturedServices } from '@/api/services/use-services';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -35,9 +33,10 @@ export default function CustomerHomeScreen() {
     ? t('home.greeting_morning', { name: profile?.name?.split(' ')[0] ?? 'أختي' })
     : t('home.greeting_evening', { name: profile?.name?.split(' ')[0] ?? 'أختي' });
 
-  const filteredServices = services?.filter(
-    (s) => activeCategory === 'all' || s.categoryId === activeCategory,
-  );
+  const matchesCategory = (categoryId: string) =>
+    activeCategory === 'all' || categoryId === activeCategory;
+  const filteredServices = services?.filter((s) => matchesCategory(s.categoryId));
+  const filteredFeatured = featured?.filter((s) => matchesCategory(s.categoryId));
 
   return (
     <Screen scrollable edges={['top']}>
@@ -54,23 +53,6 @@ export default function CustomerHomeScreen() {
             {greeting}
           </Text>
         </View>
-
-        {/* Category chips */}
-        <FlatList
-          data={[{ id: 'all', label: 'الكل', key: 'all', icon: '' }, ...CATEGORIES]}
-          keyExtractor={(c) => c.id}
-          horizontal
-          inverted
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipList}
-          renderItem={({ item }) => (
-            <Chip
-              label={item.label}
-              selected={activeCategory === item.id}
-              onPress={() => setActiveCategory(item.id)}
-            />
-          )}
-        />
       </View>
 
       {/* Sticky search bar */}
@@ -100,14 +82,14 @@ export default function CustomerHomeScreen() {
 
       <View style={styles.listContent}>
           {/* Featured */}
-          {featured && featured.length > 0 && (
+          {filteredFeatured && filteredFeatured.length > 0 && (
             <View>
               <Text variant="body" weight="semibold" style={styles.sectionTitle}>
                 {t('home.featured_title')}
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.featuredRow}>
-                  {featured.map((s) => {
+                  {filteredFeatured.map((s) => {
                     const provider = MOCK_PROVIDERS.find((p) => p.id === s.providerId);
                     return (
                       <View key={s.id} style={styles.featuredCard}>
@@ -149,7 +131,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   greeting: { fontSize: 22, color: 'hsl(199, 41%, 12%)', flex: 1, textAlign: 'right' },
-  chipList: { gap: 8, paddingHorizontal: 4 },
 
   searchContainer: { paddingHorizontal: 16, paddingBottom: 8 },
   toggleContainer: { paddingHorizontal: 16, paddingBottom: 12 },
