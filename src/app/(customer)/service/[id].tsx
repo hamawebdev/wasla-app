@@ -37,7 +37,7 @@ export default function ServiceDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'hsl(180, 25%, 98%)' }}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         {/* Hero image carousel */}
         <View style={styles.hero}>
           <Image
