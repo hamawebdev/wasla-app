@@ -23,7 +23,7 @@ export const MOCK_TRANSACTIONS: WalletTransaction[] = [
     id: 'tx3',
     type: 'expense',
     amount: 500,
-    description: 'رسوم منصة وصلة — مايو 2026',
+    description: 'رسوم منصة واصل — مايو 2026',
     date: '2026-05-05',
     status: 'completed',
   },

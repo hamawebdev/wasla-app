@@ -39,12 +39,10 @@ export default function RootLayout() {
         <Stack.Screen name="(shared)" options={{ headerShown: false }} />
         <Stack.Screen name="(customer)" options={{ headerShown: false }} />
         <Stack.Screen name="(provider)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        <Stack.Screen name="role-select" options={{ headerShown: false }} />
+        <Stack.Screen name="account-picker" options={{ headerShown: false }} />
         <Stack.Screen name="location-permission" options={{ headerShown: false }} />
         <Stack.Screen name="location-manual" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack>
     </Providers>
   );

@@ -8,7 +8,6 @@ import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 export default function AppGate() {
   const status = useAuthStore.use.status();
   const role = useAuthStore.use.role();
-  const setupComplete = useAuthStore.use.setupComplete();
   const [isFirstTime] = useIsFirstTime();
 
   const hideSplash = useCallback(async () => {
@@ -24,10 +23,9 @@ export default function AppGate() {
   if (status === 'idle') return null;
 
   if (isFirstTime) return <Redirect href="/onboarding" />;
-  if (status === 'signOut') return <Redirect href="/role-select" />;
+  if (status === 'signOut') return <Redirect href="/account-picker" />;
 
   if (role === 'provider') {
-    if (!setupComplete) return <Redirect href="/(auth)/provider-setup" />;
     return <Redirect href="/(provider)/" />;
   }
 

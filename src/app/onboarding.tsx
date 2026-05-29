@@ -54,12 +54,12 @@ export default function OnboardingScreen() {
 
   const handleFinish = () => {
     setIsFirstTime(false);
-    router.replace('/role-select');
+    router.replace('/account-picker');
   };
 
   const handleHaveAccount = () => {
     setIsFirstTime(false);
-    router.replace('/(auth)/register');
+    router.replace('/account-picker');
   };
 
   const renderItem: FlatListProps<Slide>['renderItem'] = ({ item }) => (

@@ -1,15 +1,15 @@
+import type { UserRole } from '@/features/auth/use-auth-store';
 import { useRouter } from 'expo-router';
 import { Briefcase, Search } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
-import type { UserRole } from '@/features/auth/use-auth-store';
 import { setRole } from '@/features/auth/use-auth-store';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -20,7 +20,8 @@ export default function RoleSelectScreen() {
   const [selected, setSelected] = useState<UserRole | null>(null);
 
   const handleContinue = () => {
-    if (!selected) return;
+    if (!selected)
+      return;
     setRole(selected);
     router.push('/(auth)/register');
   };
@@ -31,7 +32,7 @@ export default function RoleSelectScreen() {
         {/* Logo / Header */}
         <View style={styles.header}>
           <Text variant="heading" weight="semibold" style={styles.appName}>
-            وصلة
+            واصل
           </Text>
           <Text variant="body" style={styles.subtitle}>
             {t('auth.role_title')}
@@ -66,12 +67,12 @@ export default function RoleSelectScreen() {
   );
 }
 
-interface RoleOptionProps {
+type RoleOptionProps = {
   icon: React.ReactNode;
   label: string;
   selected: boolean;
   onPress: () => void;
-}
+};
 
 function RoleOption({ icon, label, selected, onPress }: RoleOptionProps) {
   return (

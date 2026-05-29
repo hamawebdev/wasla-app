@@ -100,7 +100,7 @@ export default antfu(
     ...betterTailwindcss.configs.recommended,
     settings: {
       'better-tailwindcss': {
-        entryPoint: path.resolve(__dirname, './src/global.css'),
+        tailwindConfig: path.resolve(__dirname, './tailwind.config.js'),
       },
     },
     rules: {

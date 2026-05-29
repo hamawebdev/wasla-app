@@ -21,7 +21,7 @@ export default function CustomerProviderProfileScreen() {
           <ChevronRight size={24} color={PRIMARY} />
         </Pressable>
         <Text variant="heading" weight="bold" style={styles.title}>
-          واصلة
+          واصل
         </Text>
         <Pressable
           onPress={() => router.push('/(shared)/notifications')}

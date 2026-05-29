@@ -75,7 +75,7 @@ export default function ProviderProfileScreen() {
 
   const handleSignOut = () => {
     signOut();
-    router.replace('/role-select' as any);
+    router.replace('/account-picker' as any);
     showMessage({ message: 'تم تسجيل الخروج', type: 'info' });
   };
 
