@@ -1,3 +1,6 @@
+import type { TrackingStatus } from '@/api/types';
+import type { Bounds, LatLng } from '@/lib/location';
+import type { CameraRef } from '@/lib/location/map';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowRight,
@@ -10,7 +13,8 @@ import {
   Star,
 } from 'lucide-react-native';
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   Linking,
@@ -18,15 +22,21 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
-
-import { Text } from '@/components/ui/text';
 import { MOCK_BOOKINGS, PROVIDER_NAMES, SERVICE_NAMES } from '@/api/fixtures/bookings';
+
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { MOCK_SERVICES } from '@/api/fixtures/services';
-import type { TrackingStatus } from '@/api/types';
+import { Text } from '@/components/ui/text';
+import {
+  boundsForPoints,
+  coordsForCityName,
+  FOCUS_ZOOM,
+  jitterAround,
+  MAP_STYLE_JSON,
+  toPosition,
+} from '@/lib/location';
+import { Camera, GeoJSONSource, Layer, MapView, Marker } from '@/lib/location/map';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_SOFT = 'hsl(258, 45%, 96%)';
@@ -45,23 +55,93 @@ function getInitial(name: string) {
   return name?.trim()?.[0] ?? '?';
 }
 
+// Map area: provider → destination route with a marker at each end.
+function TrackMap({
+  destination,
+  providerPoint,
+  bounds,
+}: {
+  destination: LatLng;
+  providerPoint: LatLng;
+  bounds: Bounds | null;
+}) {
+  const cameraRef = useRef<CameraRef>(null);
+
+  const routeGeoJSON = useMemo(
+    () => ({
+      type: 'Feature' as const,
+      properties: {},
+      geometry: {
+        type: 'LineString' as const,
+        coordinates: [toPosition(providerPoint), toPosition(destination)],
+      },
+    }),
+    [providerPoint, destination],
+  );
+
+  const fit = () => {
+    if (bounds) {
+      cameraRef.current?.fitBounds(bounds, {
+        padding: { top: 100, right: 80, bottom: 320, left: 80 },
+        duration: 0,
+      });
+    }
+  };
+
+  return (
+    <MapView
+      mapStyle={MAP_STYLE_JSON}
+      style={styles.mapArea}
+      logo={false}
+      attributionPosition={{ top: 8, left: 8 }}
+      compass={false}
+      onDidFinishLoadingMap={fit}
+    >
+      <Camera ref={cameraRef} center={toPosition(destination)} zoom={FOCUS_ZOOM} />
+
+      <GeoJSONSource id="route" data={routeGeoJSON} lineMetrics>
+        <Layer
+          id="route-line"
+          type="line"
+          layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+          paint={{ 'line-color': PRIMARY, 'line-width': 4, 'line-dasharray': [2, 1.5] }}
+        />
+      </GeoJSONSource>
+
+      {/* Destination marker (home) */}
+      <Marker lngLat={toPosition(destination)} anchor="bottom">
+        <View style={styles.markerCircle}>
+          <Home size={20} color={GOLD} fill={GOLD} />
+        </View>
+      </Marker>
+
+      {/* Provider marker (van) */}
+      <Marker lngLat={toPosition(providerPoint)} anchor="center">
+        <View style={styles.markerVan}>
+          <Car size={22} color="#fff" />
+        </View>
+      </Marker>
+    </MapView>
+  );
+}
+
 export default function TrackScreen() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const booking = MOCK_BOOKINGS.find((b) => b.id === bookingId);
-  const provider = booking ? MOCK_PROVIDERS.find((p) => p.id === booking.providerId) : undefined;
-  const service = booking ? MOCK_SERVICES.find((s) => s.id === booking.serviceId) : undefined;
+  const booking = MOCK_BOOKINGS.find(b => b.id === bookingId);
+  const provider = booking ? MOCK_PROVIDERS.find(p => p.id === booking.providerId) : undefined;
+  const service = booking ? MOCK_SERVICES.find(s => s.id === booking.serviceId) : undefined;
 
   const tracking: TrackingStatus = booking?.trackingStatus ?? 'on_the_way';
   const activeIndex = STEP_ORDER.indexOf(tracking);
 
-  const providerName =
-    provider?.name ?? PROVIDER_NAMES[booking?.providerId ?? ''] ?? 'مزود الخدمة';
-  const serviceTitle =
-    service?.title ?? SERVICE_NAMES[booking?.serviceId ?? ''] ?? 'الخدمة';
+  const providerName
+    = provider?.name ?? PROVIDER_NAMES[booking?.providerId ?? ''] ?? 'مزود الخدمة';
+  const serviceTitle
+    = service?.title ?? SERVICE_NAMES[booking?.serviceId ?? ''] ?? 'الخدمة';
 
   const steps = useMemo(
     () => [
@@ -71,6 +151,16 @@ export default function TrackScreen() {
     ],
     [t],
   );
+
+  // Destination = customer address city; provider sits a few km away.
+  // Coordinates are derived (mock data has none) but deterministic per booking.
+  const destination = coordsForCityName(booking?.address);
+  // When the provider has "arrived", collapse onto the destination.
+  const providerPoint
+    = tracking === 'arrived'
+      ? destination
+      : jitterAround(destination, booking?.providerId ?? bookingId ?? 'p', 5);
+  const bounds = boundsForPoints([destination, providerPoint]);
 
   const handleChat = () => {
     router.push('/(customer)/chat/t1');
@@ -82,34 +172,8 @@ export default function TrackScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Map area: flat tint + decorative markers + dashed route */}
-      <View style={styles.mapArea}>
-        <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Path
-            d="M 60 220 Q 180 80 300 260"
-            stroke={PRIMARY}
-            strokeWidth={3}
-            strokeDasharray="8 8"
-            fill="none"
-            opacity={0.5}
-          />
-        </Svg>
-
-        {/* Destination marker (home) */}
-        <View style={[styles.marker, styles.markerDest]}>
-          <View style={styles.markerCircle}>
-            <Home size={20} color={GOLD} fill={GOLD} />
-          </View>
-          <View style={styles.markerDot} />
-        </View>
-
-        {/* Provider marker (van) */}
-        <View style={[styles.marker, styles.markerProvider]}>
-          <View style={styles.markerVan}>
-            <Car size={22} color="#fff" />
-          </View>
-        </View>
-      </View>
+      {/* Map area: real map with provider → destination route */}
+      <TrackMap destination={destination} providerPoint={providerPoint} bounds={bounds} />
 
       {/* Header overlay */}
       <SafeAreaView edges={['top']} style={styles.headerWrap}>
@@ -149,15 +213,17 @@ export default function TrackScreen() {
 
           {/* Provider card */}
           <View style={styles.providerCard}>
-            {provider?.avatar ? (
-              <Image source={{ uri: provider.avatar }} style={styles.providerAvatar} />
-            ) : (
-              <View style={[styles.providerAvatar, styles.providerInitialWrap]}>
-                <Text variant="heading" weight="semibold" style={styles.providerInitial}>
-                  {getInitial(providerName)}
-                </Text>
-              </View>
-            )}
+            {provider?.avatar
+              ? (
+                  <Image source={{ uri: provider.avatar }} style={styles.providerAvatar} />
+                )
+              : (
+                  <View style={[styles.providerAvatar, styles.providerInitialWrap]}>
+                    <Text variant="heading" weight="semibold" style={styles.providerInitial}>
+                      {getInitial(providerName)}
+                    </Text>
+                  </View>
+                )}
             <View style={styles.providerInfo}>
               <Text variant="body" weight="semibold" numberOfLines={1} style={styles.providerName}>
                 {providerName}
@@ -246,12 +312,8 @@ const styles = StyleSheet.create({
 
   mapArea: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: SOFT_BG,
   },
 
-  marker: { position: 'absolute', alignItems: 'center' },
-  markerDest: { top: '25%', right: '20%' },
-  markerProvider: { top: '45%', left: '25%' },
   markerCircle: {
     backgroundColor: '#fff',
     padding: 8,
@@ -261,13 +323,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 4,
-  },
-  markerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#fff',
-    marginTop: 4,
   },
   markerVan: {
     backgroundColor: PRIMARY,

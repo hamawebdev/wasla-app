@@ -1,50 +1,71 @@
+import type { Service } from '@/api/types';
+import type { LatLng } from '@/lib/location';
+import type { CameraRef } from '@/lib/location/map';
+import BottomSheet from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
 import { Locate, MapPin, X } from 'lucide-react-native';
-import React, { useMemo, useRef, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   TextInput,
   View,
 } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomSheet from '@gorhom/bottom-sheet';
+import { useServices } from '@/api/services/use-services';
 
-import { Text } from '@/components/ui/text';
 import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/ui/star-rating';
-import { useServices } from '@/api/services/use-services';
-import type { Service } from '@/api/types';
+import { Text } from '@/components/ui/text';
+import {
+  ALGIERS,
+  boundsForPoints,
+  CITY_ZOOM,
+  coordsForCityName,
+  COUNTRY_ZOOM,
+  FOCUS_ZOOM,
+  forwardGeocode,
+  jitterAround,
+  MAP_STYLE_JSON,
+  toPosition,
+  useDeviceLocation,
+} from '@/lib/location';
+import { Camera, MapView, Marker } from '@/lib/location/map';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const MUTED = 'hsl(198, 15%, 45%)';
 const BORDER = 'hsl(198, 21%, 88%)';
 
-// Derive deterministic mock coords from service id
-function mockCoords(service: Service) {
-  const seed = service.id.charCodeAt(service.id.length - 1);
-  return {
-    // Algiers city center area
-    lat: 36.737 + (seed % 10) * 0.01,
-    lng: 3.086 + (seed % 8) * 0.008,
-  };
+// Deterministic coordinate for a service: jitter around its city center so a
+// given service always lands in the same place. Mock data has no real coords.
+function coordsForService(service: Service): LatLng {
+  return jitterAround(coordsForCityName(service.city), service.id);
 }
 
-function CompactServiceCard({ service, onPress }: { service: Service; onPress: () => void }) {
+function CompactServiceCard({
+  service,
+  selected,
+  onPress,
+}: {
+  service: Service;
+  selected: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.compactCard, pressed && { opacity: 0.9 }]}
+      style={({ pressed }) => [
+        styles.compactCard,
+        selected && styles.compactCardSelected,
+        pressed && { opacity: 0.9 },
+      ]}
     >
-      <Image
-        source={{ uri: service.images[0] }}
-        style={styles.compactImage}
-        resizeMode="cover"
-      />
+      <Image source={{ uri: service.images[0] }} style={styles.compactImage} resizeMode="cover" />
       <View style={styles.compactBody}>
         <Text variant="label" weight="semibold" numberOfLines={1} style={styles.compactTitle}>
           {service.title}
@@ -59,46 +80,161 @@ function CompactServiceCard({ service, onPress }: { service: Service; onPress: (
   );
 }
 
+// Collapsed bottom sheet listing nearby services. Selecting a card focuses its
+// marker via `onSelect`; the parent keeps the sheet/list refs.
+function ServiceSheet({
+  sheetRef,
+  listRef,
+  snapPoints,
+  services,
+  selectedId,
+  onOpenService,
+}: {
+  sheetRef: React.RefObject<BottomSheet | null>;
+  listRef: React.RefObject<FlatList<Service> | null>;
+  snapPoints: (string | number)[];
+  services: Service[];
+  selectedId: string | null;
+  onOpenService: (service: Service) => void;
+}) {
+  return (
+    <BottomSheet
+      ref={sheetRef}
+      index={0}
+      snapPoints={snapPoints}
+      backgroundStyle={styles.sheetBg}
+      handleIndicatorStyle={styles.handleIndicator}
+    >
+      <View style={styles.sheetHeader}>
+        <Text variant="body" weight="semibold" style={styles.sheetTitle}>
+          {services.length}
+          {' '}
+          خدمة قريبة منك
+        </Text>
+      </View>
+
+      <FlatList
+        ref={listRef}
+        data={services}
+        horizontal
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.horizontalList}
+        showsHorizontalScrollIndicator={false}
+        onScrollToIndexFailed={() => {}}
+        renderItem={({ item }) => (
+          <CompactServiceCard
+            service={item}
+            selected={item.id === selectedId}
+            onPress={() => onOpenService(item)}
+          />
+        )}
+      />
+    </BottomSheet>
+  );
+}
+
 export default function MapScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  const cameraRef = useRef<CameraRef>(null);
+  const listRef = useRef<FlatList<Service>>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => [130, 320, '80%'], []);
+  const { request: requestLocation, status: locationStatus } = useDeviceLocation();
 
   const { data: services = [] } = useServices();
 
-  const filtered = query
-    ? services.filter((s) => s.title.includes(query) || s.city.includes(query))
-    : services;
+  const filtered = useMemo(
+    () =>
+      query
+        ? services.filter(s => s.title.includes(query) || s.city.includes(query))
+        : services,
+    [services, query],
+  );
+
+  // Each service gets a stable coordinate keyed by its id.
+  const points = useMemo(
+    () => filtered.map(s => ({ service: s, point: coordsForService(s) })),
+    [filtered],
+  );
+
+  // Bounds across all services, used to frame the map once it loads.
+  const allBounds = useMemo(() => boundsForPoints(services.map(coordsForService)), [services]);
+
+  const fitAll = useCallback(() => {
+    if (allBounds) {
+      cameraRef.current?.fitBounds(allBounds, {
+        padding: { top: 64, right: 64, bottom: 360, left: 64 },
+        duration: 0,
+      });
+    }
+  }, [allBounds]);
+
+  const focusService = useCallback((service: Service, index: number) => {
+    setSelectedId(service.id);
+    cameraRef.current?.easeTo({ center: toPosition(coordsForService(service)), zoom: FOCUS_ZOOM, duration: 350 });
+    listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
+    bottomSheetRef.current?.snapToIndex(1);
+  }, []);
+
+  const handleRecenter = useCallback(async () => {
+    const coords = await requestLocation();
+    if (coords)
+      cameraRef.current?.easeTo({ center: toPosition(coords), zoom: FOCUS_ZOOM, duration: 400 });
+    else
+      showMessage({ message: 'تعذّر الوصول إلى موقعكِ. فعّلي إذن الموقع من الإعدادات.', type: 'warning' });
+  }, [requestLocation]);
+
+  const handleSearchSubmit = useCallback(async () => {
+    const q = query.trim();
+    if (!q)
+      return;
+    setSearching(true);
+    // Prefer geocoding the typed text to recenter the map; the list filters live.
+    const geo = await forwardGeocode(q);
+    setSearching(false);
+    if (geo)
+      cameraRef.current?.flyTo({ center: toPosition(geo), zoom: CITY_ZOOM, duration: 600 });
+    else if (filtered.length === 0)
+      showMessage({ message: 'لم نعثر على نتائج لهذا البحث.', type: 'info' });
+  }, [query, filtered.length]);
 
   return (
     <View style={styles.container}>
-      {/* Map placeholder — TODO: replace with react-native-maps MapView when added */}
-      <View style={styles.mapArea}>
-        <Image
-          source={{ uri: 'https://picsum.photos/seed/algiers-map/800/1200' }}
-          style={styles.mapImage}
-          resizeMode="cover"
-        />
+      <MapView
+        mapStyle={MAP_STYLE_JSON}
+        style={StyleSheet.absoluteFill}
+        logo={false}
+        attributionPosition={{ bottom: 8, left: 8 }}
+        compass={false}
+        onDidFinishLoadingMap={fitAll}
+      >
+        <Camera ref={cameraRef} center={toPosition(ALGIERS)} zoom={COUNTRY_ZOOM} />
 
-        {/* Mock pin markers */}
-        {filtered.slice(0, 6).map((service, idx) => {
-          // Deterministic pixel offsets for mock pins
-          const col = idx % 3;
-          const row = Math.floor(idx / 3);
-          const leftPx = 60 + col * 100;
-          const topPx = 120 + row * 140;
+        {points.map(({ service, point }, idx) => {
+          const isSelected = service.id === selectedId;
           return (
-            <Pressable
+            <Marker
               key={service.id}
-              style={[styles.pin, { left: leftPx, top: topPx }]}
-              onPress={() => router.push(`/(customer)/service/${service.id}`)}
+              id={service.id}
+              lngLat={toPosition(point)}
+              anchor="bottom"
+              onPress={() => focusService(service, idx)}
             >
-              <MapPin size={28} color={PRIMARY} fill={PRIMARY} />
-            </Pressable>
+              <View>
+                <MapPin
+                  size={isSelected ? 38 : 30}
+                  color={PRIMARY}
+                  fill={isSelected ? PRIMARY : '#fff'}
+                />
+              </View>
+            </Marker>
           );
         })}
-      </View>
+      </MapView>
 
       {/* Floating search bar */}
       <SafeAreaView style={styles.searchWrapper} edges={['top']}>
@@ -111,7 +247,9 @@ export default function MapScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="ابحثي عن خدمة..."
+            onSubmitEditing={handleSearchSubmit}
+            returnKeyType="search"
+            placeholder="ابحثي عن خدمة أو مكان..."
             placeholderTextColor={MUTED}
             style={styles.searchInput}
             textAlign="right"
@@ -120,48 +258,28 @@ export default function MapScreen() {
       </SafeAreaView>
 
       {/* Recenter button */}
-      <Pressable style={styles.recenterBtn} onPress={() => {}}>
+      <Pressable
+        style={styles.recenterBtn}
+        onPress={handleRecenter}
+        disabled={locationStatus === 'loading' || searching}
+      >
         <Locate size={22} color={PRIMARY} />
       </Pressable>
 
-      {/* Bottom sheet with service cards */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={0}
+      <ServiceSheet
+        sheetRef={bottomSheetRef}
+        listRef={listRef}
         snapPoints={snapPoints}
-        backgroundStyle={styles.sheetBg}
-        handleIndicatorStyle={styles.handleIndicator}
-      >
-        {/* Collapsed: horizontal list */}
-        <View style={styles.sheetHeader}>
-          <Text variant="body" weight="semibold" style={styles.sheetTitle}>
-            {filtered.length} خدمة قريبة منك
-          </Text>
-        </View>
-
-        <FlatList
-          data={filtered}
-          horizontal
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.horizontalList}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <CompactServiceCard
-              service={item}
-              onPress={() => router.push(`/(customer)/service/${item.id}`)}
-            />
-          )}
-        />
-      </BottomSheet>
+        services={filtered}
+        selectedId={selectedId}
+        onOpenService={service => router.push(`/(customer)/service/${service.id}`)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  mapArea: { flex: 1, position: 'relative' },
-  mapImage: { width: '100%', height: '100%' },
-  pin: { position: 'absolute' },
 
   searchWrapper: {
     position: 'absolute',
@@ -224,6 +342,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: BORDER,
   },
+  compactCardSelected: { borderColor: PRIMARY, borderWidth: 2 },
   compactImage: { width: '100%', aspectRatio: 4 / 3 },
   compactBody: { padding: 10, gap: 6 },
   compactTitle: { color: FOREGROUND, textAlign: 'right' },

@@ -27,6 +27,11 @@ const appIconBadgeConfig: AppIconBadgeConfig = {
   ],
 };
 
+const locationPluginConfig = {
+  locationWhenInUsePermission:
+    'نسمح لـ Wassel باستخدام موقعكِ لعرض الخدمات القريبة وتحديد عناوينكِ على الخريطة.',
+};
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: Env.EXPO_PUBLIC_NAME,
@@ -116,6 +121,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-localization',
     'expo-router',
+    ['expo-location', locationPluginConfig],
+    // MapLibre (OpenStreetMap raster tiles) — no API key required on any platform.
+    '@maplibre/maplibre-react-native',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
   ],
