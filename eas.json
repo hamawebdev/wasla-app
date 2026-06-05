@@ -22,12 +22,12 @@
     "preview": {
       "channel": "preview",
       "autoIncrement": true,
-      "distribution": "store",
+      "distribution": "internal",
       "ios": {
         "image": "latest"
       },
       "android": {
-        "buildType": "app-bundle",
+        "buildType": "apk",
         "image": "latest"
       },
       "environment": "preview",
