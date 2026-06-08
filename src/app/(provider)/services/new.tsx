@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Camera, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Camera } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
 import {
@@ -14,19 +14,34 @@ import { showMessage } from 'react-native-flash-message';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { CATEGORIES as MOCK_CATEGORIES } from '@/api/fixtures/categories';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
 const DARK = 'hsl(199, 41%, 12%)';
 const BORDER = 'hsl(198, 21%, 88%)';
 
-const STEPS = ['الاسم والفئة', 'الوصف والسعر', 'صور الأعمال', 'أوقات الإتاحة'];
+const STEPS = [
+  'provider.service_step1',
+  'provider.service_step2',
+  'provider.service_step3',
+  'provider.service_step4',
+];
 
 const TIME_SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
-const ARABIC_DAYS_FULL = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
+const DAY_KEYS = [
+  'days.monday',
+  'days.tuesday',
+  'days.wednesday',
+  'days.thursday',
+  'days.friday',
+  'days.saturday',
+  'days.sunday',
+];
 
 export default function NewServiceScreen() {
   const { t } = useTranslation();
@@ -62,8 +77,8 @@ export default function NewServiceScreen() {
       setStep((s) => s + 1);
     } else {
       showMessage({
-        message: 'تم إضافة الخدمة بنجاح!',
-        description: 'ستظهر خدمتكِ للعملاء قريباً',
+        message: t('provider.service_added_title'),
+        description: t('provider.service_added_body'),
         type: 'success',
       });
       router.back();
@@ -80,7 +95,7 @@ export default function NewServiceScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={handleBack} hitSlop={8}>
-          <ChevronLeft size={24} color={DARK} style={{ transform: [{ scaleX: -1 }] }} />
+          <ChevronBack size={24} color={DARK} />
         </Pressable>
         <Text variant="label" weight="semibold" style={{ color: DARK }}>
           {t('provider.add_service')}
@@ -95,25 +110,25 @@ export default function NewServiceScreen() {
         ))}
       </View>
       <Text variant="label" weight="semibold" style={styles.stepTitle}>
-        {STEPS[step]}
+        {t(STEPS[step])}
       </Text>
 
       <View style={styles.form}>
         {step === 0 && (
           <>
             <View>
-              <Text variant="label" style={styles.fieldLabel}>اسم الخدمة</Text>
+              <Text variant="label" style={styles.fieldLabel}>{t('provider.field_service_name')}</Text>
               <TextInput
                 value={name}
                 onChangeText={setName}
-                placeholder="مثال: تفصيل قنادر تقليدية"
+                placeholder={t('provider.service_name_placeholder')}
                 placeholderTextColor={MUTED}
-                textAlign="right"
+                textAlign={textAlignStart}
                 style={styles.input}
               />
             </View>
             <View>
-              <Text variant="label" style={styles.fieldLabel}>الفئة</Text>
+              <Text variant="label" style={styles.fieldLabel}>{t('search.category')}</Text>
               <View style={styles.categoryGrid}>
                 {MOCK_CATEGORIES.map((cat) => (
                   <Pressable
@@ -137,27 +152,27 @@ export default function NewServiceScreen() {
         {step === 1 && (
           <>
             <View>
-              <Text variant="label" style={styles.fieldLabel}>وصف الخدمة</Text>
+              <Text variant="label" style={styles.fieldLabel}>{t('service.description')}</Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder="صفي خدمتكِ بالتفصيل..."
+                placeholder={t('provider.description_placeholder')}
                 placeholderTextColor={MUTED}
                 multiline
                 numberOfLines={4}
-                textAlign="right"
+                textAlign={textAlignStart}
                 style={[styles.input, styles.textarea]}
               />
             </View>
             <View>
-              <Text variant="label" style={styles.fieldLabel}>السعر (د.ج)</Text>
+              <Text variant="label" style={styles.fieldLabel}>{`${t('service.price')} (${t('common.dzd')})`}</Text>
               <TextInput
                 value={price}
                 onChangeText={setPrice}
                 placeholder="0"
                 placeholderTextColor={MUTED}
                 keyboardType="numeric"
-                textAlign="right"
+                textAlign={textAlignStart}
                 style={styles.input}
               />
             </View>
@@ -193,12 +208,12 @@ export default function NewServiceScreen() {
                 onPress={() => setPhotos((p) => [...p, `photo_${p.length}`])}
               >
                 <Camera size={24} color={PRIMARY} />
-                <Text variant="caption" style={{ color: PRIMARY }}>إضافة</Text>
+                <Text variant="caption" style={{ color: PRIMARY }}>{t('tabs.add')}</Text>
               </Pressable>
             )}
             {photos.length === 0 && (
               <Text variant="caption" style={styles.photoHint}>
-                أضيفي حتى 5 صور لأعمالكِ لجذب المزيد من العملاء
+                {t('provider.photos_hint')}
               </Text>
             )}
           </View>
@@ -206,25 +221,25 @@ export default function NewServiceScreen() {
 
         {step === 3 && (
           <>
-            <Text variant="label" style={styles.fieldLabel}>الأيام المتاحة</Text>
+            <Text variant="label" style={styles.fieldLabel}>{t('provider.available_days')}</Text>
             <View style={styles.daysGrid}>
-              {ARABIC_DAYS_FULL.map((day) => (
+              {DAY_KEYS.map((dayKey) => (
                 <Pressable
-                  key={day}
-                  style={[styles.dayChip, availableDays.has(day) && styles.dayChipActive]}
-                  onPress={() => toggleDay(day)}
+                  key={dayKey}
+                  style={[styles.dayChip, availableDays.has(dayKey) && styles.dayChipActive]}
+                  onPress={() => toggleDay(dayKey)}
                 >
                   <Text
                     variant="caption"
-                    style={availableDays.has(day) ? { color: '#fff' } : { color: MUTED }}
+                    style={availableDays.has(dayKey) ? { color: '#fff' } : { color: MUTED }}
                   >
-                    {day}
+                    {t(dayKey)}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            <Text variant="label" style={styles.fieldLabel}>أوقات العمل</Text>
+            <Text variant="label" style={styles.fieldLabel}>{t('provider.working_hours')}</Text>
             <View style={styles.timeSlotsGrid}>
               {TIME_SLOTS.map((slot) => (
                 <Pressable
@@ -258,14 +273,14 @@ export default function NewServiceScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
     paddingBottom: 8,
   },
   stepper: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 8,
     paddingHorizontal: 20,
     justifyContent: 'center',
@@ -285,7 +300,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   form: { paddingHorizontal: 20, gap: 16 },
-  fieldLabel: { textAlign: 'right', color: DARK, marginBottom: 8 },
+  fieldLabel: { textAlign: textAlignStart, color: DARK, marginBottom: 8 },
   input: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -298,7 +313,7 @@ const styles = StyleSheet.create({
   },
   textarea: { minHeight: 100, textAlignVertical: 'top' },
   categoryGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     flexWrap: 'wrap',
     gap: 8,
   },
@@ -314,7 +329,7 @@ const styles = StyleSheet.create({
   catLabel: { color: MUTED },
   catLabelSelected: { color: '#fff' },
   priceToggle: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     backgroundColor: 'hsl(200, 20%, 94%)',
     borderRadius: 10,
     padding: 4,
@@ -327,7 +342,7 @@ const styles = StyleSheet.create({
   },
   priceBtnActive: { backgroundColor: PRIMARY },
   photosGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     flexWrap: 'wrap',
     gap: 10,
   },
@@ -343,12 +358,12 @@ const styles = StyleSheet.create({
   photoAdd: { borderWidth: 2, borderColor: PRIMARY, borderStyle: 'dashed', backgroundColor: 'hsl(258, 45%, 97%)' },
   photoHint: {
     flex: 1,
-    textAlign: 'right',
+    textAlign: textAlignStart,
     color: MUTED,
     alignSelf: 'center',
     paddingStart: 12,
   },
-  daysGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8 },
+  daysGrid: { flexDirection: rowDirection, flexWrap: 'wrap', gap: 8 },
   dayChip: {
     paddingHorizontal: 14,
     paddingVertical: 9,
@@ -358,7 +373,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   dayChipActive: { backgroundColor: PRIMARY, borderColor: PRIMARY },
-  timeSlotsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8 },
+  timeSlotsGrid: { flexDirection: rowDirection, flexWrap: 'wrap', gap: 8 },
   timeSlot: {
     paddingHorizontal: 16,
     paddingVertical: 10,

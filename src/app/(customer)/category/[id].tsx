@@ -3,7 +3,6 @@ import {
   Brush,
   Calendar,
   Camera,
-  ChevronRight,
   Code,
   Cookie,
   GraduationCap,
@@ -16,6 +15,7 @@ import {
   Utensils,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   Pressable,
@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Chip } from '@/components/ui/chip';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Text } from '@/components/ui/text';
@@ -32,6 +33,7 @@ import { ServiceCard } from '@/components/wasla/service-card';
 import { useSearchServices } from '@/api/services/use-services';
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import type { SearchFilters } from '@/api/types';
+import { rowDirection } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -52,29 +54,17 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   photography: <Camera size={32} color={PRIMARY} />,
 };
 
-const CATEGORY_NAMES: Record<string, string> = {
-  sewing: 'خياطة وتفصيل',
-  sweets: 'حلويات',
-  beauty: 'تجميل',
-  events: 'مناسبات',
-  phone_repair: 'إصلاح هواتف',
-  digital: 'تسويق رقمي',
-  cleaning: 'تنظيف',
-  cooking: 'طبخ',
-  tuition: 'دروس خصوصية',
-  photography: 'تصوير',
-};
-
 type SortKey = 'distance' | 'rating' | 'price_asc' | 'price_desc';
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'distance', label: 'الأقرب' },
-  { key: 'rating', label: 'الأعلى تقييماً' },
-  { key: 'price_asc', label: 'السعر: من الأقل' },
-  { key: 'price_desc', label: 'السعر: من الأعلى' },
+  { key: 'distance', label: 'search.sort_nearest' },
+  { key: 'rating', label: 'search.sort_rating' },
+  { key: 'price_asc', label: 'search.sort_price_low' },
+  { key: 'price_desc', label: 'search.sort_price_high' },
 ];
 
 export default function CategoryBrowseScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id: categoryId } = useLocalSearchParams<{ id: string }>();
   const [sortBy, setSortBy] = useState<SortKey>('distance');
@@ -82,7 +72,8 @@ export default function CategoryBrowseScreen() {
   const filters: SearchFilters = { categoryId: categoryId ?? '', sortBy };
   const { data: services = [], isLoading } = useSearchServices(filters);
 
-  const categoryName = CATEGORY_NAMES[categoryId ?? ''] ?? 'تصفح الخدمات';
+  const hasCategory = !!categoryId && categoryId in CATEGORY_ICONS;
+  const categoryName = hasCategory ? t(`categories.${categoryId}`) : t('home.browse_services');
   const categoryIcon = CATEGORY_ICONS[categoryId ?? ''] ?? <Package size={32} color={PRIMARY} />;
 
   return (
@@ -90,7 +81,7 @@ export default function CategoryBrowseScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
           {categoryName}
@@ -120,7 +111,7 @@ export default function CategoryBrowseScreen() {
               {SORT_OPTIONS.map((opt) => (
                 <Chip
                   key={opt.key}
-                  label={opt.label}
+                  label={t(opt.label)}
                   selected={sortBy === opt.key}
                   onPress={() => setSortBy(opt.key)}
                 />
@@ -130,7 +121,7 @@ export default function CategoryBrowseScreen() {
             {/* Results count */}
             <View style={styles.countRow}>
               <Text variant="caption" style={{ color: MUTED }}>
-                {services.length} نتيجة
+                {t('categoryBrowse.results_count', { count: services.length })}
               </Text>
             </View>
           </View>
@@ -139,9 +130,9 @@ export default function CategoryBrowseScreen() {
           !isLoading ? (
             <EmptyState
               illustration={<Package size={64} color="hsl(198, 21%, 88%)" />}
-              title="لا توجد خدمات في هذه الفئة حالياً"
-              body="تحققي لاحقاً أو استعرضي تصنيفات أخرى"
-              cta={{ label: 'العودة للرئيسية', onPress: () => router.push('/(customer)/') }}
+              title={t('categoryBrowse.empty_title')}
+              body={t('categoryBrowse.empty_body')}
+              cta={{ label: t('categoryBrowse.go_home'), onPress: () => router.push('/(customer)/') }}
             />
           ) : null
         }
@@ -157,7 +148,7 @@ export default function CategoryBrowseScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -189,6 +180,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND,
     textAlign: 'center',
   },
-  sortRow: { gap: 8, flexDirection: 'row-reverse' },
+  sortRow: { gap: 8, flexDirection: rowDirection },
   countRow: { alignItems: 'flex-end' },
 });

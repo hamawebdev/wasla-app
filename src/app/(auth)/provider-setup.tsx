@@ -15,6 +15,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { setSetupComplete } from '@/features/auth/use-auth-store';
 import { CATEGORIES } from '@/api/fixtures/categories';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -139,7 +140,7 @@ function Step2({ t }: { t: (k: string) => string }) {
         <Text variant="body" style={{ color: MUTED, textAlign: 'center' }}>{t('auth.add_photos')}</Text>
       </Card>
       <Text variant="caption" style={{ color: MUTED, textAlign: 'center' }}>
-        يمكنكِ إضافة حتى 5 صور من أعمالكِ
+        {t('auth.photos_hint')}
       </Text>
     </View>
   );
@@ -152,13 +153,13 @@ function Step3({ radius, setRadius, t }: { radius: number; setRadius: (v: number
       <Card style={styles.mapPlaceholder}>
         <View style={styles.mapPin} />
         <Text variant="caption" style={{ color: MUTED, textAlign: 'center' }}>
-          موقعكِ الحالي
+          {t('auth.current_location')}
         </Text>
       </Card>
       <View style={styles.radiusRow}>
-        <Text variant="label" style={{ color: MUTED }}>1 كم</Text>
-        <Text variant="body" weight="semibold" style={{ color: PRIMARY }}>{radius} كم</Text>
-        <Text variant="label" style={{ color: MUTED }}>50 كم</Text>
+        <Text variant="label" style={{ color: MUTED }}>1 {t('common.km')}</Text>
+        <Text variant="body" weight="semibold" style={{ color: PRIMARY }}>{radius} {t('common.km')}</Text>
+        <Text variant="label" style={{ color: MUTED }}>50 {t('common.km')}</Text>
       </View>
     </View>
   );
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 24 },
   stepContent: { gap: 16 },
 
-  categoryLabel: { textAlign: 'right', color: 'hsl(199, 41%, 12%)', marginBottom: -4 },
+  categoryLabel: { textAlign: textAlignStart, color: 'hsl(199, 41%, 12%)', marginBottom: -4 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   categoryItem: {
     width: '30%',
@@ -214,6 +215,6 @@ const styles = StyleSheet.create({
     backgroundColor: PRIMARY,
     marginBottom: 4,
   },
-  radiusRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4 },
+  radiusRow: { flexDirection: rowDirection, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4 },
   footer: { padding: 24, gap: 8 },
 });

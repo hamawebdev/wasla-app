@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  ArrowLeft,
   Banknote,
   Building2,
   CreditCard,
@@ -16,9 +15,12 @@ import { useTranslation } from 'react-i18next';
 import { MOCK_SERVICES } from '@/api/fixtures/services';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ArrowForward } from '@/components/ui/directional-icon';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { BookingStepper } from '@/components/wasla/booking-stepper';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_TINT = 'hsl(258, 45%, 96%)';
@@ -28,16 +30,16 @@ const BORDER = 'hsl(198, 21%, 88%)';
 const ON_SURFACE = 'hsl(199, 41%, 12%)';
 
 const ADDRESSES = [
-  { id: 'home', label: 'المنزل', detail: 'شارع ديدوش مراد، العاصمة، الجزائر' },
-  { id: 'office', label: 'المكتب', detail: 'حي باب الزوار للأعمال، الجزائر' },
+  { id: 'home', labelKey: 'addresses.label_home', detail: 'شارع ديدوش مراد، العاصمة، الجزائر' },
+  { id: 'office', labelKey: 'addresses.label_work', detail: 'حي باب الزوار للأعمال، الجزائر' },
 ];
 
 type PaymentMethod = 'cash' | 'gold_card' | 'bridi_mob';
 
 const PAYMENT_METHODS: { id: PaymentMethod; label: string; Icon: typeof Banknote }[] = [
-  { id: 'cash', label: 'نقداً', Icon: Banknote },
-  { id: 'gold_card', label: 'البطاقة الذهبية', Icon: CreditCard },
-  { id: 'bridi_mob', label: 'بريدي موب', Icon: Building2 },
+  { id: 'cash', label: 'booking.payment_cash', Icon: Banknote },
+  { id: 'gold_card', label: 'booking.payment_gold_card', Icon: CreditCard },
+  { id: 'bridi_mob', label: 'booking.payment_bridi_mob', Icon: Building2 },
 ];
 
 const PLATFORM_FEE = 200;
@@ -66,7 +68,7 @@ export default function BookingStep2() {
       setPromoError(null);
     } else {
       setAppliedDiscount(0);
-      setPromoError('كود غير صالح');
+      setPromoError(t('booking.promo_invalid'));
     }
   };
 
@@ -83,7 +85,7 @@ export default function BookingStep2() {
           <View style={styles.sectionHeader}>
             <MapPin size={20} color={PRIMARY} />
             <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-              عنوان الخدمة
+              {t('booking.service_address')}
             </Text>
           </View>
 
@@ -105,7 +107,7 @@ export default function BookingStep2() {
                   </View>
                   <View style={styles.addressInfo}>
                     <Text variant="label" weight="medium" style={styles.addressLabel}>
-                      {addr.label}
+                      {t(addr.labelKey)}
                     </Text>
                     <Text variant="caption" style={styles.addressDetail}>
                       {addr.detail}
@@ -130,7 +132,7 @@ export default function BookingStep2() {
         <Card style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-              ملاحظات إضافية
+              {t('booking.additional_notes')}
             </Text>
           </View>
           <TextInput
@@ -140,7 +142,7 @@ export default function BookingStep2() {
             onChangeText={setDetails}
             multiline
             numberOfLines={3}
-            textAlign="right"
+            textAlign={textAlignStart}
             style={styles.textarea}
           />
         </Card>
@@ -150,25 +152,25 @@ export default function BookingStep2() {
           <View style={styles.sectionHeader}>
             <Tag size={20} color={PRIMARY} />
             <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-              كود الخصم
+              {t('booking.promo_code')}
             </Text>
           </View>
           <View style={styles.promoRow}>
             <TextInput
-              placeholder="أدخل الكود هنا"
+              placeholder={t('booking.promo_placeholder')}
               placeholderTextColor={MUTED}
               value={promoInput}
               onChangeText={(v) => {
                 setPromoInput(v);
                 if (promoError) setPromoError(null);
               }}
-              textAlign="right"
+              textAlign={textAlignStart}
               autoCapitalize="characters"
               style={styles.promoInput}
             />
             <Pressable onPress={applyPromo} style={styles.promoBtn}>
               <Text variant="label" weight="medium" style={styles.promoBtnLabel}>
-                تطبيق
+                {t('common.apply')}
               </Text>
             </Pressable>
           </View>
@@ -179,7 +181,7 @@ export default function BookingStep2() {
           )}
           {appliedDiscount > 0 && (
             <Text variant="caption" style={styles.promoSuccess}>
-              تم تطبيق الخصم
+              {t('booking.promo_applied')}
             </Text>
           )}
         </Card>
@@ -189,7 +191,7 @@ export default function BookingStep2() {
           <View style={styles.sectionHeader}>
             <CreditCard size={20} color={PRIMARY} />
             <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-              طريقة الدفع
+              {t('service.payment')}
             </Text>
           </View>
           <View style={styles.paymentGrid}>
@@ -207,7 +209,7 @@ export default function BookingStep2() {
                     weight="medium"
                     style={[styles.paymentLabel, isSelected && styles.paymentLabelSelected]}
                   >
-                    {label}
+                    {t(label)}
                   </Text>
                 </Pressable>
               );
@@ -219,45 +221,45 @@ export default function BookingStep2() {
         <Card style={[styles.section, styles.breakdownCard]}>
           <View style={styles.sectionHeader}>
             <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-              تفاصيل السعر
+              {t('booking.price_details')}
             </Text>
           </View>
 
           <View style={styles.breakdownRow}>
             <Text variant="body" weight="medium" style={styles.breakdownValue}>
-              {serviceCost.toLocaleString('ar-DZ')} د.ج
+              {formatNumber(serviceCost)} {t('common.dzd')}
             </Text>
             <Text variant="body" style={styles.breakdownLabel}>
-              تكلفة الخدمة
+              {t('booking.service_cost')}
             </Text>
           </View>
 
           <View style={styles.breakdownRow}>
             <Text variant="body" weight="medium" style={styles.breakdownValue}>
-              {PLATFORM_FEE.toLocaleString('ar-DZ')} د.ج
+              {formatNumber(PLATFORM_FEE)} {t('common.dzd')}
             </Text>
             <Text variant="body" style={styles.breakdownLabel}>
-              رسوم المنصة
+              {t('booking.platform_fee')}
             </Text>
           </View>
 
           {appliedDiscount > 0 && (
             <View style={styles.breakdownRow}>
               <Text variant="body" weight="medium" style={styles.discountValue}>
-                - {appliedDiscount.toLocaleString('ar-DZ')} د.ج
+                - {formatNumber(appliedDiscount)} {t('common.dzd')}
               </Text>
               <Text variant="body" style={styles.discountLabel}>
-                خصم (كود ترحيبي)
+                {t('booking.discount_promo')}
               </Text>
             </View>
           )}
 
           <View style={styles.totalRow}>
             <Text variant="heading" weight="semibold" style={styles.totalValue}>
-              {total.toLocaleString('ar-DZ')} د.ج
+              {formatNumber(total)} {t('common.dzd')}
             </Text>
             <Text variant="body" weight="semibold" style={styles.totalLabel}>
-              المجموع الإجمالي
+              {t('booking.grand_total')}
             </Text>
           </View>
         </Card>
@@ -268,16 +270,16 @@ export default function BookingStep2() {
         <View style={styles.bottomBarInner}>
           <View style={styles.bottomTotal}>
             <Text variant="caption" style={styles.bottomTotalLabel}>
-              المجموع المطلوب
+              {t('booking.amount_due')}
             </Text>
             <Text variant="heading" weight="semibold" style={styles.bottomTotalValue}>
-              {total.toLocaleString('ar-DZ')} د.ج
+              {formatNumber(total)} {t('common.dzd')}
             </Text>
           </View>
           <Button
             variant="primary"
             label={t('booking.confirm')}
-            rightIcon={<ArrowLeft size={18} color="#fff" />}
+            rightIcon={<ArrowForward size={18} color="#fff" />}
             onPress={() => router.replace(`/(customer)/booking/${serviceId}/confirmation`)}
             style={styles.bottomBarBtn}
           />
@@ -292,8 +294,8 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, gap: 16, paddingBottom: 120 },
 
   section: { gap: 12, padding: 16 },
-  sectionHeader: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
-  sectionTitle: { color: ON_SURFACE, fontSize: 16, textAlign: 'right' },
+  sectionHeader: { flexDirection: rowDirection, alignItems: 'center', gap: 8 },
+  sectionTitle: { color: ON_SURFACE, fontSize: 16, textAlign: textAlignStart },
 
   /* Address */
   mapThumb: {
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
   },
   addressList: { gap: 8 },
   addressRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 12,
     padding: 10,
     borderRadius: 8,
@@ -338,8 +340,8 @@ const styles = StyleSheet.create({
     backgroundColor: PRIMARY,
   },
   addressInfo: { flex: 1, gap: 2 },
-  addressLabel: { color: ON_SURFACE, textAlign: 'right' },
-  addressDetail: { color: MUTED, textAlign: 'right', fontSize: 13 },
+  addressLabel: { color: ON_SURFACE, textAlign: textAlignStart },
+  addressDetail: { color: MUTED, textAlign: textAlignStart, fontSize: 13 },
   addAddressBtn: { alignSelf: 'flex-end' },
 
   /* Notes */
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
   },
 
   /* Promo */
-  promoRow: { flexDirection: 'row-reverse', gap: 8 },
+  promoRow: { flexDirection: rowDirection, gap: 8 },
   promoInput: {
     flex: 1,
     backgroundColor: SURFACE,
@@ -379,11 +381,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   promoBtnLabel: { color: PRIMARY },
-  promoError: { color: 'hsl(0, 84%, 60%)', textAlign: 'right', fontSize: 13 },
-  promoSuccess: { color: PRIMARY, textAlign: 'right', fontSize: 13 },
+  promoError: { color: 'hsl(0, 84%, 60%)', textAlign: textAlignStart, fontSize: 13 },
+  promoSuccess: { color: PRIMARY, textAlign: textAlignStart, fontSize: 13 },
 
   /* Payment */
-  paymentGrid: { flexDirection: 'row-reverse', gap: 8 },
+  paymentGrid: { flexDirection: rowDirection, gap: 8 },
   paymentCard: {
     flex: 1,
     alignItems: 'center',
@@ -405,7 +407,7 @@ const styles = StyleSheet.create({
   /* Breakdown */
   breakdownCard: { borderTopWidth: 3, borderTopColor: PRIMARY },
   breakdownRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -414,7 +416,7 @@ const styles = StyleSheet.create({
   discountLabel: { color: PRIMARY, fontSize: 14 },
   discountValue: { color: PRIMARY, fontSize: 14 },
   totalRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
@@ -444,7 +446,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   bottomBarInner: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 12,

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
-import { ChevronRight, MapPin, MoreVertical, Trash2 } from 'lucide-react-native';
+import { MapPin, MoreVertical, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   FlatList,
@@ -13,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
@@ -21,18 +23,19 @@ import {
   useSetDefaultAddress,
 } from '@/api/services/use-addresses';
 import type { Address } from '@/api/types';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
+
+const LABEL_KEYS: Record<string, string> = {
+  home: 'addresses.label_home',
+  work: 'addresses.label_work',
+  other: 'addresses.label_other',
+};
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
 const BG = 'hsl(180, 25%, 98%)';
 const BORDER = 'hsl(198, 21%, 88%)';
-
-const LABEL_MAP: Record<string, string> = {
-  home: 'المنزل',
-  work: 'العمل',
-  other: 'آخر',
-};
 
 function AddressCard({
   address,
@@ -43,6 +46,7 @@ function AddressCard({
   onSetDefault: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
@@ -50,11 +54,11 @@ function AddressCard({
       <View style={styles.cardHeader}>
         <View style={styles.cardHeaderLeft}>
           <Badge
-            label={LABEL_MAP[address.label] ?? address.labelText}
+            label={LABEL_KEYS[address.label] ? t(LABEL_KEYS[address.label]) : address.labelText}
             variant={address.label === 'home' ? 'primary' : 'accent'}
           />
           {address.isDefault && (
-            <Badge label="افتراضي" variant="success" />
+            <Badge label={t('addresses.default')} variant="success" />
           )}
         </View>
 
@@ -92,8 +96,8 @@ function AddressCard({
               style={styles.menuRow}
               onPress={() => { setMenuVisible(false); onSetDefault(); }}
             >
-              <Text variant="body" style={{ color: FOREGROUND, textAlign: 'right' }}>
-                تعيين كعنوان افتراضي
+              <Text variant="body" style={{ color: FOREGROUND, textAlign: textAlignStart }}>
+                {t('addresses.set_default')}
               </Text>
             </Pressable>
           )}
@@ -102,19 +106,19 @@ function AddressCard({
             onPress={() => {
               setMenuVisible(false);
               Alert.alert(
-                'حذف العنوان',
-                'هل تريدين حذف هذا العنوان؟',
+                t('addresses.delete'),
+                t('addresses.delete_confirm'),
                 [
-                  { text: 'إلغاء', style: 'cancel' },
-                  { text: 'حذف', style: 'destructive', onPress: onDelete },
+                  { text: t('common.cancel'), style: 'cancel' },
+                  { text: t('common.delete'), style: 'destructive', onPress: onDelete },
                 ],
               );
             }}
           >
-            <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8 }}>
+            <View style={{ flexDirection: rowDirection, alignItems: 'center', gap: 8 }}>
               <Trash2 size={16} color="hsl(0, 84%, 60%)" />
-              <Text variant="body" style={{ color: 'hsl(0, 84%, 60%)', textAlign: 'right' }}>
-                حذف العنوان
+              <Text variant="body" style={{ color: 'hsl(0, 84%, 60%)', textAlign: textAlignStart }}>
+                {t('addresses.delete')}
               </Text>
             </View>
           </Pressable>
@@ -125,6 +129,7 @@ function AddressCard({
 }
 
 export default function AddressesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: addresses = [], isLoading } = useAddresses();
   const setDefault = useSetDefaultAddress();
@@ -135,10 +140,10 @@ export default function AddressesScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          عناويني
+          {t('addresses.title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -152,9 +157,9 @@ export default function AddressesScreen() {
           isLoading ? null : (
             <EmptyState
               illustration={<MapPin size={64} color="hsl(198, 21%, 88%)" />}
-              title="لا توجد عناوين بعد"
-              body="أضيفي عنوانك الأول لتسهيل عملية الحجز"
-              cta={{ label: 'أضيفي عنواناً', onPress: () => router.push('/(shared)/addresses/new') }}
+              title={t('addresses.empty_title')}
+              body={t('addresses.empty_body')}
+              cta={{ label: t('addresses.add'), onPress: () => router.push('/(shared)/addresses/new') }}
             />
           )
         }
@@ -169,7 +174,7 @@ export default function AddressesScreen() {
           addresses.length > 0 ? (
             <Button
               variant="outline"
-              label="+ أضيفي عنواناً جديداً"
+              label={`+ ${t('addresses.add')}`}
               onPress={() => router.push('/(shared)/addresses/new')}
               style={styles.addBtn}
             />
@@ -183,7 +188,7 @@ export default function AddressesScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -207,23 +212,23 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   cardHeaderLeft: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 8,
     alignItems: 'center',
   },
   moreBtn: { padding: 4 },
   cardBody: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-start',
     gap: 8,
   },
-  addressText: { flex: 1, color: FOREGROUND, textAlign: 'right' },
-  notes: { color: MUTED, textAlign: 'right' },
+  addressText: { flex: 1, color: FOREGROUND, textAlign: textAlignStart },
+  notes: { color: MUTED, textAlign: textAlignStart },
   addBtn: { marginTop: 8, marginHorizontal: 0 },
   menuBackdrop: {
     flex: 1,

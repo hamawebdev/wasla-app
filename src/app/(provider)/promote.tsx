@@ -10,6 +10,8 @@ import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { StarBadgeIllustration } from '@/components/illustrations';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -22,8 +24,8 @@ export default function PromoteScreen() {
 
   const handleUsePoints = () => {
     showMessage({
-      message: 'تم استخدام 500 نقطة بنجاح!',
-      description: 'خدماتكِ ستظهر في القائمة المميزة لمدة 7 أيام',
+      message: t('provider.promote_success_title'),
+      description: t('provider.promote_success_body'),
       type: 'success',
     });
     router.back();
@@ -31,7 +33,7 @@ export default function PromoteScreen() {
 
   const handleBuyDirect = () => {
     showMessage({
-      message: 'سيتم إعادة توجيهكِ لبوابة الدفع',
+      message: t('provider.redirect_payment'),
       type: 'info',
     });
   };
@@ -54,15 +56,15 @@ export default function PromoteScreen() {
         {/* Benefits list */}
         <Card style={styles.benefitsCard}>
           {[
-            'ظهور خدماتكِ في أعلى نتائج البحث',
-            'شارة "مميزة" على كل خدمة',
-            'إشعار لأكثر من 200 عميلة في المنطقة',
-            'مدة 7 أيام كاملة',
-          ].map((benefit, i) => (
-            <View key={i} style={styles.benefitRow}>
+            'provider.promote_benefit_1',
+            'provider.promote_benefit_2',
+            'provider.promote_benefit_3',
+            'provider.promote_benefit_4',
+          ].map((benefitKey) => (
+            <View key={benefitKey} style={styles.benefitRow}>
               <Star size={14} color={ACCENT} fill={ACCENT} />
               <Text variant="body" style={styles.benefitText}>
-                {benefit}
+                {t(benefitKey)}
               </Text>
             </View>
           ))}
@@ -74,13 +76,13 @@ export default function PromoteScreen() {
             <View style={styles.optionHeader}>
               <Zap size={20} color={PRIMARY} />
               <Text variant="label" weight="semibold" style={{ color: PRIMARY }}>
-                استبدال النقاط
+                {t('provider.redeem_points')}
               </Text>
             </View>
             <Text variant="heading" weight="semibold" style={styles.optionPrice}>
-              500 نقطة
+              {`${formatNumber(500)} ${t('loyalty.points_unit')}`}
             </Text>
-            <Text variant="caption" style={styles.optionNote}>رصيدكِ الحالي: 350 نقطة</Text>
+            <Text variant="caption" style={styles.optionNote}>{t('provider.current_balance_points', { points: 350 })}</Text>
             <Button
               variant="secondary"
               label={t('provider.use_points')}
@@ -93,13 +95,13 @@ export default function PromoteScreen() {
             <View style={styles.optionHeader}>
               <Star size={20} color={ACCENT} />
               <Text variant="label" weight="semibold" style={{ color: DARK }}>
-                الدفع المباشر
+                {t('provider.direct_payment')}
               </Text>
             </View>
             <Text variant="heading" weight="semibold" style={styles.optionPrice}>
-              990 د.ج
+              {`${formatNumber(990)} ${t('common.dzd')}`}
             </Text>
-            <Text variant="caption" style={styles.optionNote}>لمدة 7 أيام</Text>
+            <Text variant="caption" style={styles.optionNote}>{t('provider.for_7_days')}</Text>
             <Button
               variant="primary"
               label={t('provider.buy_direct')}
@@ -120,12 +122,12 @@ const styles = StyleSheet.create({
   body: { textAlign: 'center', color: MUTED, lineHeight: 24 },
 
   benefitsCard: { gap: 10 },
-  benefitRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
-  benefitText: { flex: 1, textAlign: 'right', color: DARK },
+  benefitRow: { flexDirection: rowDirection, alignItems: 'center', gap: 10 },
+  benefitText: { flex: 1, textAlign: textAlignStart, color: DARK },
 
-  options: { flexDirection: 'row-reverse', gap: 12 },
+  options: { flexDirection: rowDirection, gap: 12 },
   optionCard: { flex: 1, gap: 10, alignItems: 'center' },
-  optionHeader: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
+  optionHeader: { flexDirection: rowDirection, alignItems: 'center', gap: 6 },
   optionPrice: { textAlign: 'center', color: DARK, fontSize: 22 },
   optionNote: { textAlign: 'center', color: MUTED },
 });

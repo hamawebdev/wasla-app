@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Locate, MapPin, X } from 'lucide-react-native';
 import * as React from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   Image,
@@ -35,6 +36,8 @@ import {
   useDeviceLocation,
 } from '@/lib/location';
 import { Camera, MapView, Marker } from '@/lib/location/map';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const FOREGROUND = 'hsl(199, 41%, 12%)';
@@ -56,6 +59,7 @@ function CompactServiceCard({
   selected: boolean;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={onPress}
@@ -72,7 +76,7 @@ function CompactServiceCard({
         </Text>
         <StarRating value={service.rating} size={12} showCount count={service.reviewCount} />
         <Badge
-          label={`${service.priceFrom ? 'ابتداءً من ' : ''}${service.price.toLocaleString('ar-DZ')} د.ج`}
+          label={`${service.priceFrom ? `${t('common.starting_from')} ` : ''}${formatNumber(service.price)} ${t('common.dzd')}`}
           variant="primary"
         />
       </View>
@@ -97,6 +101,7 @@ function ServiceSheet({
   selectedId: string | null;
   onOpenService: (service: Service) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <BottomSheet
       ref={sheetRef}
@@ -107,9 +112,7 @@ function ServiceSheet({
     >
       <View style={styles.sheetHeader}>
         <Text variant="body" weight="semibold" style={styles.sheetTitle}>
-          {services.length}
-          {' '}
-          خدمة قريبة منك
+          {t('map.nearby', { count: services.length })}
         </Text>
       </View>
 
@@ -134,6 +137,7 @@ function ServiceSheet({
 }
 
 export default function MapScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -185,7 +189,7 @@ export default function MapScreen() {
     if (coords)
       cameraRef.current?.easeTo({ center: toPosition(coords), zoom: FOCUS_ZOOM, duration: 400 });
     else
-      showMessage({ message: 'تعذّر الوصول إلى موقعكِ. فعّلي إذن الموقع من الإعدادات.', type: 'warning' });
+      showMessage({ message: t('map.location_denied'), type: 'warning' });
   }, [requestLocation]);
 
   const handleSearchSubmit = useCallback(async () => {
@@ -199,7 +203,7 @@ export default function MapScreen() {
     if (geo)
       cameraRef.current?.flyTo({ center: toPosition(geo), zoom: CITY_ZOOM, duration: 600 });
     else if (filtered.length === 0)
-      showMessage({ message: 'لم نعثر على نتائج لهذا البحث.', type: 'info' });
+      showMessage({ message: t('map.no_search_results'), type: 'info' });
   }, [query, filtered.length]);
 
   return (
@@ -249,10 +253,10 @@ export default function MapScreen() {
             onChangeText={setQuery}
             onSubmitEditing={handleSearchSubmit}
             returnKeyType="search"
-            placeholder="ابحثي عن خدمة أو مكان..."
+            placeholder={t('map.search_placeholder')}
             placeholderTextColor={MUTED}
             style={styles.searchInput}
-            textAlign="right"
+            textAlign={textAlignStart}
           />
         </View>
       </SafeAreaView>
@@ -289,7 +293,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   searchCard: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -331,7 +335,7 @@ const styles = StyleSheet.create({
   sheetBg: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20 },
   handleIndicator: { backgroundColor: BORDER, width: 40 },
   sheetHeader: { paddingHorizontal: 16, paddingVertical: 10 },
-  sheetTitle: { color: FOREGROUND, textAlign: 'right' },
+  sheetTitle: { color: FOREGROUND, textAlign: textAlignStart },
 
   horizontalList: { paddingHorizontal: 16, gap: 12 },
   compactCard: {
@@ -345,5 +349,5 @@ const styles = StyleSheet.create({
   compactCardSelected: { borderColor: PRIMARY, borderWidth: 2 },
   compactImage: { width: '100%', aspectRatio: 4 / 3 },
   compactBody: { padding: 10, gap: 6 },
-  compactTitle: { color: FOREGROUND, textAlign: 'right' },
+  compactTitle: { color: FOREGROUND, textAlign: textAlignStart },
 });

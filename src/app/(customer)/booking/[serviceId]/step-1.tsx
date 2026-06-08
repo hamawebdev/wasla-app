@@ -9,14 +9,22 @@ import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { BookingStepper } from '@/components/wasla/booking-stepper';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
 
 const MONTH_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
 const TIME_SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-const ARABIC_DAYS = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'أ'];
-const MONTHS = ['مايو 2025', 'يونيو 2025'];
+const WEEKDAY_KEYS = [
+  'days.narrow_mon',
+  'days.narrow_tue',
+  'days.narrow_wed',
+  'days.narrow_thu',
+  'days.narrow_fri',
+  'days.narrow_sat',
+  'days.narrow_sun',
+];
 
 export default function BookingStep1() {
   const { serviceId } = useLocalSearchParams<{ serviceId: string }>();
@@ -36,10 +44,10 @@ export default function BookingStep1() {
 
         {/* Mini calendar */}
         <Card style={styles.calendarCard}>
-          <Text variant="label" weight="semibold" style={styles.monthLabel}>{MONTHS[0]}</Text>
+          <Text variant="label" weight="semibold" style={styles.monthLabel}>{t('booking.calendar_month')}</Text>
           <View style={styles.weekdayRow}>
-            {ARABIC_DAYS.map((d) => (
-              <Text key={d} variant="caption" style={styles.weekday}>{d}</Text>
+            {WEEKDAY_KEYS.map((d) => (
+              <Text key={d} variant="caption" style={styles.weekday}>{t(d)}</Text>
             ))}
           </View>
           <View style={styles.daysGrid}>
@@ -118,7 +126,7 @@ const styles = StyleSheet.create({
   calendarCard: { gap: 12 },
   monthLabel: { textAlign: 'center', color: 'hsl(199, 41%, 12%)', fontSize: 16 },
 
-  weekdayRow: { flexDirection: 'row-reverse', justifyContent: 'space-around' },
+  weekdayRow: { flexDirection: rowDirection, justifyContent: 'space-around' },
   weekday: { color: MUTED, textAlign: 'center', width: 32 },
 
   daysGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-end' },
@@ -136,8 +144,8 @@ const styles = StyleSheet.create({
   dayTextSelected: { color: '#fff', fontWeight: '600' },
   dayTextPast: { color: MUTED },
 
-  sectionLabel: { textAlign: 'right', color: 'hsl(199, 41%, 12%)' },
-  timeRow: { flexDirection: 'row-reverse', gap: 10, paddingVertical: 4 },
+  sectionLabel: { textAlign: textAlignStart, color: 'hsl(199, 41%, 12%)' },
+  timeRow: { flexDirection: rowDirection, gap: 10, paddingVertical: 4 },
   timeSlot: {
     paddingHorizontal: 18,
     paddingVertical: 12,

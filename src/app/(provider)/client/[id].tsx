@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronRight, MessageCircle } from 'lucide-react-native';
+import { MessageCircle } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import {
   CUSTOMER_CITIES,
@@ -16,6 +17,8 @@ import {
 } from '@/api/fixtures/bookings';
 import { useBookingsStore } from '@/lib/stores/bookings';
 import type { BookingStatus } from '@/api/types';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -32,10 +35,10 @@ const STATUS_VARIANTS: Record<BookingStatus, 'warning' | 'success' | 'muted' | '
 };
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
-  pending: 'جديدة',
-  confirmed: 'الحالية',
-  completed: 'مكتملة',
-  cancelled: 'ملغية',
+  pending: 'provider.clients_new',
+  confirmed: 'provider.clients_current',
+  completed: 'provider.clients_completed',
+  cancelled: 'booking.status_cancelled',
 };
 
 export default function ProviderClientProfileScreen() {
@@ -44,7 +47,7 @@ export default function ProviderClientProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const customerId = id ?? '';
 
-  const customerName = CUSTOMER_NAMES[customerId] ?? 'عميلة';
+  const customerName = CUSTOMER_NAMES[customerId] ?? t('profile.role_customer');
   const customerCity = CUSTOMER_CITIES[customerId];
 
   const bookings = useBookingsStore((s) => s.bookings);
@@ -65,7 +68,7 @@ export default function ProviderClientProfileScreen() {
       {/* App bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={12}>
-          <ChevronRight size={24} color={PRIMARY} />
+          <ChevronBack size={24} color={PRIMARY} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
           {t('provider.client_profile')}
@@ -134,17 +137,17 @@ export default function ProviderClientProfileScreen() {
             <View key={booking.id} style={styles.bookingRow}>
               <View style={styles.bookingInfo}>
                 <Text variant="body" weight="medium" numberOfLines={1} style={styles.bookingTitle}>
-                  {SERVICE_NAMES[booking.serviceId] ?? 'خدمة'}
+                  {SERVICE_NAMES[booking.serviceId] ?? t('common.service')}
                 </Text>
                 <Text variant="caption" style={styles.bookingDate}>
                   {booking.date} — {booking.time}
                 </Text>
                 <Text variant="caption" style={styles.bookingPrice}>
-                  {booking.price.toLocaleString('ar-DZ')} د.ج
+                  {formatNumber(booking.price)} {t('common.dzd')}
                 </Text>
               </View>
               <Badge
-                label={STATUS_LABELS[booking.status]}
+                label={t(STATUS_LABELS[booking.status])}
                 variant={STATUS_VARIANTS[booking.status]}
               />
             </View>
@@ -161,7 +164,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 32 },
 
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
   city: { color: MUTED, textAlign: 'center' },
 
   statsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     paddingHorizontal: 16,
     gap: 10,
     marginTop: 12,
@@ -205,7 +208,7 @@ const styles = StyleSheet.create({
   statLabel: { textAlign: 'center', color: MUTED, fontSize: 12 },
 
   contactBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
@@ -218,10 +221,10 @@ const styles = StyleSheet.create({
   contactBtnText: { color: '#fff' },
 
   section: { paddingHorizontal: 16, marginTop: 20, gap: 8 },
-  sectionTitle: { textAlign: 'right', color: DARK, fontSize: 16, marginBottom: 4 },
+  sectionTitle: { textAlign: textAlignStart, color: DARK, fontSize: 16, marginBottom: 4 },
 
   bookingRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
@@ -235,7 +238,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   bookingInfo: { flex: 1, gap: 3 },
-  bookingTitle: { textAlign: 'right', color: DARK },
-  bookingDate: { textAlign: 'right', color: MUTED, fontSize: 12 },
-  bookingPrice: { textAlign: 'right', color: PRIMARY, fontSize: 13 },
+  bookingTitle: { textAlign: textAlignStart, color: DARK },
+  bookingDate: { textAlign: textAlignStart, color: MUTED, fontSize: 12 },
+  bookingPrice: { textAlign: textAlignStart, color: PRIMARY, fontSize: 13 },
 });

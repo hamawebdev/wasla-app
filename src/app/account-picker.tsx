@@ -16,6 +16,7 @@ import {
   setSetupComplete,
   signIn,
 } from '@/features/auth/use-auth-store';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -39,7 +40,7 @@ export default function AccountPickerScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text variant="heading" weight="semibold" style={styles.appName}>
-            واصل
+            {t('common.app_name')}
           </Text>
           <Text variant="body" style={styles.title}>
             {t('account_picker.title')}
@@ -110,14 +111,14 @@ const styles = StyleSheet.create({
   cards: { gap: 16 },
   accountCard: { padding: 20 },
   accountRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 14,
   },
   accountText: { flex: 1, gap: 6, alignItems: 'flex-end' },
-  accountName: { fontSize: 17, color: 'hsl(199, 25%, 25%)', textAlign: 'right' },
+  accountName: { fontSize: 17, color: 'hsl(199, 25%, 25%)', textAlign: textAlignStart },
   roleBadge: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'hsl(258, 45%, 96%)',

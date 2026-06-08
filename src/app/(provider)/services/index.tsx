@@ -12,6 +12,8 @@ import { MOCK_SERVICES } from '@/api/fixtures/services';
 import type { Service } from '@/api/types';
 import { useProviderStore } from '@/features/provider/use-provider-store';
 import { EmptyCalendarIllustration } from '@/components/illustrations';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -54,7 +56,7 @@ export default function ServicesScreen() {
 
         <View style={styles.footer}>
           <Text variant="label" weight="semibold" style={{ color: PRIMARY }}>
-            {item.price.toLocaleString('ar-DZ')} د.ج
+            {formatNumber(item.price)} {t('common.dzd')}
           </Text>
           <Text variant="caption" style={{ color: MUTED }}>
             ★ {item.rating} ({item.reviewCount})
@@ -75,8 +77,8 @@ export default function ServicesScreen() {
       {MY_SERVICES.length === 0 ? (
         <EmptyState
           illustration={<EmptyCalendarIllustration size={100} />}
-          title="لا توجد خدمات بعد"
-          body="أضيفي خدمتكِ الأولى لتبدأ في استقبال الطلبات"
+          title={t('providerPublic.no_services')}
+          body={t('provider.no_services_body')}
           cta={{ label: t('provider.add_service'), onPress: () => router.push('/(provider)/services/new') }}
         />
       ) : (
@@ -118,14 +120,14 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   cardTop: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  title: { textAlign: 'right', color: DARK },
-  desc: { textAlign: 'right', color: MUTED },
+  title: { textAlign: textAlignStart, color: DARK },
+  desc: { textAlign: textAlignStart, color: MUTED },
   footer: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 8,

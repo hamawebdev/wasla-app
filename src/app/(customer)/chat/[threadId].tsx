@@ -28,6 +28,8 @@ import { Badge } from '@/components/ui/badge';
 import { Text } from '@/components/ui/text';
 import { MOCK_MESSAGES, MOCK_THREADS } from '@/api/fixtures/chats';
 import type { Message } from '@/api/types';
+import { formatTime } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -44,10 +46,10 @@ const PROVIDER_REPLIES = [
 ];
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'قيد الانتظار',
-  confirmed: 'مؤكد',
-  completed: 'مكتمل',
-  cancelled: 'ملغي',
+  pending: 'booking.status_pending',
+  confirmed: 'booking.status_confirmed',
+  completed: 'booking.status_completed',
+  cancelled: 'booking.status_cancelled',
 };
 
 const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'muted' | 'destructive'> = {
@@ -88,10 +90,7 @@ export default function ChatRoomScreen() {
       threadId: threadId ?? '',
       senderId: 'customer',
       text,
-      timestamp: new Date().toLocaleTimeString('ar-DZ', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      timestamp: formatTime(new Date()),
       isCustomer: true,
     };
 
@@ -107,10 +106,7 @@ export default function ChatRoomScreen() {
         threadId: threadId ?? '',
         senderId: thread?.providerId ?? 'provider',
         text: replyText,
-        timestamp: new Date().toLocaleTimeString('ar-DZ', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        timestamp: formatTime(new Date()),
         isCustomer: false,
       };
       setMessages((prev) => [...prev, reply]);
@@ -154,7 +150,7 @@ export default function ChatRoomScreen() {
     return (
       <SafeAreaView style={styles.root}>
         <Text variant="body" style={{ textAlign: 'center', marginTop: 40, color: MUTED }}>
-          المحادثة غير موجودة
+          {t('chat.not_found')}
         </Text>
       </SafeAreaView>
     );
@@ -200,7 +196,7 @@ export default function ChatRoomScreen() {
           <View style={styles.bookingCard}>
             <View style={styles.bookingCardInner}>
               <Badge
-                label={STATUS_LABELS[thread.bookingStatus ?? 'pending']}
+                label={t(STATUS_LABELS[thread.bookingStatus ?? 'pending'])}
                 variant={STATUS_VARIANTS[thread.bookingStatus ?? 'pending']}
               />
               <Text variant="caption" style={styles.bookingLabel}>
@@ -272,7 +268,7 @@ export default function ChatRoomScreen() {
             placeholderTextColor={MUTED}
             multiline
             maxLength={500}
-            textAlign="right"
+            textAlign={textAlignStart}
             onSubmitEditing={sendMessage}
             returnKeyType="send"
           />
@@ -300,7 +296,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
 
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -309,7 +305,7 @@ const styles = StyleSheet.create({
     borderBottomColor: BORDER,
     gap: 10,
   },
-  headerRight: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
+  headerRight: { flexDirection: rowDirection, alignItems: 'center', gap: 10 },
   headerCenter: { flex: 1, alignItems: 'center' },
   headerName: { color: DARK },
   headerStatus: { color: MUTED, fontSize: 12 },
@@ -324,21 +320,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   bookingCardInner: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 10,
   },
-  bookingLabel: { color: MUTED, flex: 1, textAlign: 'right' },
+  bookingLabel: { color: MUTED, flex: 1, textAlign: textAlignStart },
 
   safetyBanner: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: ACCENT_BG,
   },
-  safetyText: { flex: 1, color: ACCENT_FG, textAlign: 'right', fontSize: 12 },
+  safetyText: { flex: 1, color: ACCENT_FG, textAlign: textAlignStart, fontSize: 12 },
 
   msgList: { padding: 16, gap: 4, paddingBottom: 8 },
   msgWrapper: { marginBottom: 8 },
@@ -362,12 +358,12 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
     borderBottomEndRadius: 4,
   },
-  bubbleText: { textAlign: 'right', lineHeight: 22 },
+  bubbleText: { textAlign: textAlignStart, lineHeight: 22 },
   bubbleTextCustomer: { color: '#fff' },
   bubbleTextProvider: { color: DARK },
 
   actionsPanel: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: BORDER,
@@ -387,7 +383,7 @@ const styles = StyleSheet.create({
   actionLabel: { color: PRIMARY, fontSize: 12 },
 
   inputBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-end',
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -417,7 +413,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
   },
   inputIcons: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 4,

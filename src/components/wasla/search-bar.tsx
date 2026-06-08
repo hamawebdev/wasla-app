@@ -2,6 +2,7 @@ import { Filter, Mic, Search } from 'lucide-react-native';
 import * as React from 'react';
 import type { TextInputProps } from 'react-native';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const MUTED = 'hsl(198, 15%, 45%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -20,7 +21,7 @@ export function SearchBar({ onFilterPress, ...props }: Props) {
       <TextInput
         style={styles.input}
         placeholderTextColor={MUTED}
-        textAlign="right"
+        textAlign={textAlignStart}
         returnKeyType="search"
         {...props}
       />
@@ -38,7 +39,7 @@ export function SearchBar({ onFilterPress, ...props }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,

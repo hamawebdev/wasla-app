@@ -2,9 +2,10 @@ import type { NativeSyntheticEvent } from 'react-native';
 import type { LatLng, ReverseGeocodeResult } from '@/lib/location';
 import type { CameraRef, PressEvent } from '@/lib/location/map';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Crosshair, MapPin } from 'lucide-react-native';
+import { Crosshair, MapPin } from 'lucide-react-native';
 import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAddAddress } from '@/api/services/use-addresses';
 
 import { Button } from '@/components/ui/button';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Chip } from '@/components/ui/chip';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
@@ -31,6 +33,7 @@ import {
   useDeviceLocation,
 } from '@/lib/location';
 import { Camera, MapView, Marker } from '@/lib/location/map';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const FOREGROUND = 'hsl(199, 41%, 12%)';
@@ -40,9 +43,9 @@ const BORDER = 'hsl(198, 21%, 88%)';
 type LabelType = 'home' | 'work' | 'other';
 
 const LABEL_OPTIONS: { id: LabelType; text: string }[] = [
-  { id: 'home', text: 'المنزل' },
-  { id: 'work', text: 'العمل' },
-  { id: 'other', text: 'آخر' },
+  { id: 'home', text: 'addresses.label_home' },
+  { id: 'work', text: 'addresses.label_work' },
+  { id: 'other', text: 'addresses.label_other' },
 ];
 
 // Interactive map picker. Owns the device-location + reverse-geocode work and
@@ -55,6 +58,7 @@ function AddressMapPicker({
   pin: LatLng;
   onPick: (point: LatLng, geo: ReverseGeocodeResult | null) => void;
 }) {
+  const { t } = useTranslation();
   const { request: requestLocation } = useDeviceLocation();
   const cameraRef = useRef<CameraRef>(null);
   const [geocoding, setGeocoding] = useState(false);
@@ -87,7 +91,7 @@ function AddressMapPicker({
     if (coords)
       applyPoint(coords);
     else
-      Alert.alert('الموقع', 'تعذّر الوصول إلى موقعكِ. فعّلي إذن الموقع من الإعدادات.');
+      Alert.alert(t('map.location_denied'));
   };
 
   return (
@@ -119,13 +123,13 @@ function AddressMapPicker({
               <View style={styles.mapOverlayRow}>
                 <ActivityIndicator size="small" color="#fff" />
                 <Text variant="caption" style={styles.mapLabel}>
-                  جاري تحديد العنوان...
+                  {t('location.determining_address')}
                 </Text>
               </View>
             )
           : (
               <Text variant="caption" style={styles.mapLabel}>
-                اضغطي على الخريطة لتحديد موقعك
+                {t('location.tap_map')}
               </Text>
             )}
       </View>
@@ -134,6 +138,7 @@ function AddressMapPicker({
 }
 
 export default function NewAddressScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const addAddress = useAddAddress();
 
@@ -156,13 +161,14 @@ export default function NewAddressScreen() {
 
   const handleSave = () => {
     if (!fullAddress.trim()) {
-      Alert.alert('خطأ', 'يرجى إدخال العنوان');
+      Alert.alert(t('common.error'), t('addresses.address_required'));
       return;
     }
+    const selectedOpt = LABEL_OPTIONS.find(l => l.id === selectedLabel);
     addAddress.mutate(
       {
         label: selectedLabel,
-        labelText: LABEL_OPTIONS.find(l => l.id === selectedLabel)?.text ?? '',
+        labelText: selectedOpt ? t(selectedOpt.text) : '',
         fullAddress: fullAddress.trim(),
         city: city.trim() || 'الجزائر العاصمة',
         // Real coordinates picked on the map.
@@ -180,10 +186,10 @@ export default function NewAddressScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          إضافة عنوان جديد
+          {t('addresses.add_title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -198,34 +204,34 @@ export default function NewAddressScreen() {
         {/* Form card */}
         <View style={styles.card}>
           <Input
-            label="العنوان التفصيلي"
+            label={t('addresses.detailed_address')}
             value={fullAddress}
             onChangeText={setFullAddress}
-            placeholder="مثال: حي الأمير عبد القادر، شارع 8 مايو"
+            placeholder={t('addresses.detailed_address_ph')}
           />
           <Input
-            label="المدينة"
+            label={t('addresses.city')}
             value={city}
             onChangeText={setCity}
-            placeholder="مثال: الجزائر العاصمة"
+            placeholder={t('addresses.city_ph')}
           />
           <Input
-            label="ملاحظات إضافية (اختياري)"
+            label={t('booking.cancel_notes_label')}
             value={notes}
             onChangeText={setNotes}
-            placeholder="مثال: الطابق الثالث، الشقة رقم 12"
+            placeholder={t('addresses.notes_ph')}
           />
 
           {/* Label selector */}
           <View style={styles.labelSection}>
             <Text variant="caption" weight="medium" style={styles.labelTitle}>
-              نوع العنوان
+              {t('addresses.label_type')}
             </Text>
             <View style={styles.chipRow}>
               {LABEL_OPTIONS.map(opt => (
                 <Chip
                   key={opt.id}
-                  label={opt.text}
+                  label={t(opt.text)}
                   selected={selectedLabel === opt.id}
                   onPress={() => setSelectedLabel(opt.id)}
                 />
@@ -237,7 +243,7 @@ export default function NewAddressScreen() {
 
       <View style={styles.footer}>
         <Button
-          label="حفظ العنوان"
+          label={t('addresses.save')}
           variant="primary"
           size="lg"
           loading={addAddress.isPending}
@@ -252,7 +258,7 @@ export default function NewAddressScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -298,7 +304,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   mapOverlayRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
@@ -316,8 +322,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   labelSection: { gap: 10 },
-  labelTitle: { color: 'hsl(198, 15%, 45%)', textAlign: 'right' },
-  chipRow: { flexDirection: 'row-reverse', gap: 8, flexWrap: 'wrap' },
+  labelTitle: { color: 'hsl(198, 15%, 45%)', textAlign: textAlignStart },
+  chipRow: { flexDirection: rowDirection, gap: 8, flexWrap: 'wrap' },
   footer: {
     padding: 16,
     backgroundColor: '#fff',

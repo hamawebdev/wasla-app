@@ -26,6 +26,8 @@ import {
 import { MOCK_SERVICES } from '@/api/fixtures/services';
 import type { Booking } from '@/api/types';
 import { EmptyCalendarIllustration } from '@/components/illustrations';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const MUTED = 'hsl(198, 15%, 45%)';
 const DARK = 'hsl(199, 41%, 12%)';
@@ -36,10 +38,10 @@ const ERROR_SOFT = 'hsl(0, 84%, 96%)';
 const SURFACE = 'hsl(180, 25%, 98%)';
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'قيد الانتظار',
-  confirmed: 'مؤكد',
-  completed: 'مكتمل',
-  cancelled: 'ملغي',
+  pending: 'booking.status_pending',
+  confirmed: 'booking.status_confirmed',
+  completed: 'booking.status_completed',
+  cancelled: 'booking.status_cancelled',
 };
 
 const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'muted' | 'destructive'> = {
@@ -118,15 +120,15 @@ export default function BookingsScreen() {
           <View style={styles.cardHeadText}>
             <View style={styles.cardHeadTopRow}>
               <Text variant="body" weight="semibold" numberOfLines={1} style={styles.serviceName}>
-                {SERVICE_NAMES[item.serviceId] ?? service?.title ?? 'خدمة'}
+                {SERVICE_NAMES[item.serviceId] ?? service?.title ?? t('common.service')}
               </Text>
               <Badge
-                label={STATUS_LABELS[item.status]}
+                label={t(STATUS_LABELS[item.status])}
                 variant={STATUS_VARIANTS[item.status]}
               />
             </View>
             <Text variant="caption" numberOfLines={1} style={styles.providerName}>
-              {PROVIDER_NAMES[item.providerId] ?? 'مزود الخدمة'}
+              {PROVIDER_NAMES[item.providerId] ?? t('profile.role_provider')}
             </Text>
           </View>
         </View>
@@ -144,7 +146,7 @@ export default function BookingsScreen() {
             </View>
           </View>
           <Text variant="body" weight="semibold" style={styles.price}>
-            {item.price.toLocaleString('ar-DZ')} د.ج
+            {formatNumber(item.price)} {t('common.dzd')}
           </Text>
         </View>
 
@@ -280,7 +282,7 @@ export default function BookingsScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
   },
 
   cardHead: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-start',
     gap: 12,
   },
@@ -327,16 +329,16 @@ const styles = StyleSheet.create({
   thumbFallback: { backgroundColor: 'hsl(258, 45%, 96%)' },
   cardHeadText: { flex: 1, gap: 4 },
   cardHeadTopRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 8,
   },
-  serviceName: { flex: 1, textAlign: 'right', color: DARK },
-  providerName: { textAlign: 'right', color: MUTED },
+  serviceName: { flex: 1, textAlign: textAlignStart, color: DARK },
+  providerName: { textAlign: textAlignStart, color: MUTED },
 
   metaRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: SURFACE,
@@ -344,16 +346,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  metaGroup: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
-  metaItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
+  metaGroup: { flexDirection: rowDirection, alignItems: 'center', gap: 10 },
+  metaItem: { flexDirection: rowDirection, alignItems: 'center', gap: 6 },
   metaText: { color: MUTED },
   metaDivider: { width: 1, height: 14, backgroundColor: BORDER },
   price: { color: PRIMARY, fontSize: 16 },
 
-  actionsRow: { flexDirection: 'row-reverse', gap: 8 },
+  actionsRow: { flexDirection: rowDirection, gap: 8 },
   actionBtn: {
     flex: 1,
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

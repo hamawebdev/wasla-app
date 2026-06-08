@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { CATEGORIES } from '@/api/fixtures/categories';
 import type { Category } from '@/api/types';
+import { rowDirection, textAlignStart, writingDir } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_BG = 'hsl(258, 45%, 96%)';
@@ -113,7 +114,7 @@ export function CategorySheet({ isOpen, selectedId, onClose, onSelect }: Props) 
             placeholderTextColor={MUTED}
             value={query}
             onChangeText={setQuery}
-            textAlign="right"
+            textAlign={textAlignStart}
             returnKeyType="search"
             autoCorrect={false}
           />
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   searchWrap: {
     marginHorizontal: 16,
     marginBottom: 8,
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 12,
@@ -212,11 +213,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: DARK,
     paddingVertical: 8,
-    writingDirection: 'rtl',
+    writingDirection: writingDir,
   },
 
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: PRIMARY_BG,
   },
-  rowLabel: { color: DARK, flex: 1, textAlign: 'right' },
+  rowLabel: { color: DARK, flex: 1, textAlign: textAlignStart },
   checkDot: {
     width: 10,
     height: 10,

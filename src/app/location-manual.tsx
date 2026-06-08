@@ -13,6 +13,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { CITY_ZOOM, coordsForCityId, MAP_STYLE_JSON, toPosition } from '@/lib/location';
 import { Camera, MapView, Marker } from '@/lib/location/map';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -69,7 +70,7 @@ export default function LocationManualScreen() {
           {!selected && (
             <View style={styles.mapHint}>
               <Text variant="caption" style={{ color: MUTED }}>
-                اختاري مدينة من القائمة
+                {t('location.choose_city_hint')}
               </Text>
             </View>
           )}
@@ -94,7 +95,7 @@ export default function LocationManualScreen() {
                 {item.name}
               </Text>
               <Text variant="caption" style={styles.wilaya}>
-                ولاية
+                {t('location.wilaya')}
                 {' '}
                 {item.wilaya}
               </Text>
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
 
   list: { flex: 1 },
   cityRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 10,
     paddingVertical: 14,
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'hsl(198, 21%, 92%)',
   },
   cityRowSelected: { backgroundColor: 'hsl(258, 45%, 98%)' },
-  cityName: { flex: 1, textAlign: 'right', color: 'hsl(199, 41%, 12%)' },
+  cityName: { flex: 1, textAlign: textAlignStart, color: 'hsl(199, 41%, 12%)' },
   cityNameSelected: { color: PRIMARY, fontWeight: '600' },
   wilaya: { color: MUTED },
 });

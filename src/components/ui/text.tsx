@@ -1,6 +1,7 @@
 import React from 'react';
 import type { TextProps } from 'react-native';
 import { Text as RNText, StyleSheet } from 'react-native';
+import { writingDir } from '@/lib/rtl';
 
 type Variant = 'body' | 'label' | 'caption' | 'heading' | 'price';
 
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Rubik',
     lineHeight: 26,
     letterSpacing: -0.16,
-    writingDirection: 'rtl',
+    writingDirection: writingDir,
   },
   heading: {
     lineHeight: 34,

@@ -1,11 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronRight } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { useHelpArticle } from '@/api/services/use-help';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -13,6 +15,7 @@ const BG = 'hsl(180, 25%, 98%)';
 const BORDER = 'hsl(198, 21%, 88%)';
 
 export default function HelpArticleScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { articleId } = useLocalSearchParams<{ articleId: string }>();
   const { data: article, isLoading } = useHelpArticle(articleId ?? '');
@@ -21,10 +24,10 @@ export default function HelpArticleScreen() {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          {article?.title ?? 'المساعدة'}
+          {article?.title ?? t('help.title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -36,7 +39,7 @@ export default function HelpArticleScreen() {
       >
         {isLoading && (
           <Text variant="body" style={{ color: MUTED, textAlign: 'center' }}>
-            جارٍ التحميل...
+            {t('common.loading')}
           </Text>
         )}
         {article && (
@@ -52,7 +55,7 @@ export default function HelpArticleScreen() {
         )}
         {!article && !isLoading && (
           <Text variant="body" style={{ color: MUTED, textAlign: 'center', marginTop: 32 }}>
-            لم يتم العثور على المقالة
+            {t('help.article_not_found')}
           </Text>
         )}
       </ScrollView>
@@ -63,7 +66,7 @@ export default function HelpArticleScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -87,7 +90,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
-  title: { color: FOREGROUND, textAlign: 'right', lineHeight: 34 },
+  title: { color: FOREGROUND, textAlign: textAlignStart, lineHeight: 34 },
   divider: { height: 1, backgroundColor: BORDER },
-  body: { color: FOREGROUND, textAlign: 'right', lineHeight: 28 },
+  body: { color: FOREGROUND, textAlign: textAlignStart, lineHeight: 28 },
 });

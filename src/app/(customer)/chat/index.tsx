@@ -10,6 +10,7 @@ import { Text } from '@/components/ui/text';
 import { SegmentedControl } from '@/components/wasla/segmented-control';
 import { MOCK_THREADS } from '@/api/fixtures/chats';
 import type { ChatThread } from '@/api/types';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: 16 },
 
   threadRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     paddingVertical: 14,
@@ -106,8 +107,8 @@ const styles = StyleSheet.create({
   separator: { height: 4 },
 
   threadCenter: { flex: 1, gap: 4 },
-  providerName: { textAlign: 'right', color: 'hsl(199, 41%, 12%)' },
-  lastMessage: { textAlign: 'right', color: MUTED },
+  providerName: { textAlign: textAlignStart, color: 'hsl(199, 41%, 12%)' },
+  lastMessage: { textAlign: textAlignStart, color: MUTED },
 
   threadLeft: { alignItems: 'flex-end', gap: 6 },
   timeText: { color: MUTED },

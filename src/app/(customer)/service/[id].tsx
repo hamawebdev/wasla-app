@@ -14,6 +14,8 @@ import { StarRating } from '@/components/ui/star-rating';
 import { Text } from '@/components/ui/text';
 import { useService, useServiceReviews } from '@/api/services/use-services';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -132,7 +134,7 @@ export default function ServiceDetailScreen() {
 
           {/* Info grid */}
           <View style={styles.infoGrid}>
-            <InfoCard label={t('service.price')} value={`${service.price.toLocaleString('ar-DZ')} د.ج`} />
+            <InfoCard label={t('service.price')} value={`${formatNumber(service.price)} ${t('common.dzd')}`} />
             <InfoCard label={t('service.duration')} value={service.duration} />
             <InfoCard label={t('service.type')} value={service.type} />
             <InfoCard label={t('service.payment')} value={service.paymentMethod} />
@@ -205,8 +207,8 @@ export default function ServiceDetailScreen() {
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
     <Card style={styles.infoCard}>
-      <Text variant="caption" style={{ color: MUTED, textAlign: 'right' }}>{label}</Text>
-      <Text variant="label" weight="semibold" style={{ color: 'hsl(199, 41%, 12%)', textAlign: 'right' }}>
+      <Text variant="caption" style={{ color: MUTED, textAlign: textAlignStart }}>{label}</Text>
+      <Text variant="label" weight="semibold" style={{ color: 'hsl(199, 41%, 12%)', textAlign: textAlignStart }}>
         {value}
       </Text>
     </Card>
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     left: 0,
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     paddingHorizontal: 16,
   },
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
   body: { padding: 16, gap: 14 },
 
   providerBar: { padding: 14 },
-  providerRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
+  providerRow: { flexDirection: rowDirection, alignItems: 'center', gap: 12 },
   avatarRing: {
     padding: 3,
     borderRadius: 999,
@@ -257,13 +259,13 @@ const styles = StyleSheet.create({
   },
   providerInfo: { flex: 1, gap: 6, alignItems: 'flex-end' },
   providerNameRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 8,
   },
   providerName: { color: 'hsl(199, 41%, 12%)', fontSize: 16 },
   providerMeta: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 4,
     flexWrap: 'wrap',
@@ -278,32 +280,32 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   viewStore: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 2,
     minHeight: 32,
   },
   viewStoreText: { color: PRIMARY },
 
-  serviceTitle: { textAlign: 'right', fontSize: 22, color: 'hsl(199, 41%, 12%)' },
-  description: { textAlign: 'right', color: 'hsl(199, 41%, 20%)', lineHeight: 26 },
-  expandLink: { color: PRIMARY, textAlign: 'right' },
+  serviceTitle: { textAlign: textAlignStart, fontSize: 22, color: 'hsl(199, 41%, 12%)' },
+  description: { textAlign: textAlignStart, color: 'hsl(199, 41%, 20%)', lineHeight: 26 },
+  expandLink: { color: PRIMARY, textAlign: textAlignStart },
 
   infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   infoCard: { width: '47%', padding: 12, gap: 4 },
 
   ratingSummary: { padding: 14 },
-  ratingRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
+  ratingRow: { flexDirection: rowDirection, justifyContent: 'space-between', alignItems: 'center' },
   ratingNumber: { fontSize: 40, color: PRIMARY },
 
   reviewCard: { gap: 8, padding: 14 },
-  reviewHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start' },
-  reviewAuthor: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  reviewHeader: { flexDirection: rowDirection, justifyContent: 'space-between', alignItems: 'flex-start' },
+  reviewAuthor: { flexDirection: rowDirection, alignItems: 'center', gap: 8 },
   reviewMeta: { alignItems: 'flex-start', gap: 4 },
-  reviewComment: { textAlign: 'right', color: 'hsl(199, 41%, 18%)', lineHeight: 24 },
+  reviewComment: { textAlign: textAlignStart, color: 'hsl(199, 41%, 18%)', lineHeight: 24 },
 
   actionBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 10,
     backgroundColor: '#fff',
     borderTopWidth: 1,

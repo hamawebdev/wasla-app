@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { setProfile } from '@/features/auth/use-auth-store';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 
@@ -44,7 +45,7 @@ export default function RegisterScreen() {
     <Screen scrollable edges={['top', 'bottom']}>
       <View style={styles.container}>
         <Text variant="heading" weight="semibold" style={styles.heading}>
-          إنشاء حساب
+          {t('auth.create_account')}
         </Text>
 
         <Card style={styles.card}>
@@ -111,12 +112,12 @@ const styles = StyleSheet.create({
   card: { gap: 14 },
 
   phoneLabel: {
-    textAlign: 'right',
+    textAlign: textAlignStart,
     color: 'hsl(199, 41%, 12%)',
     fontWeight: '500',
     marginBottom: -8,
   },
-  phoneRow: { flexDirection: 'row-reverse', gap: 8, alignItems: 'flex-end' },
+  phoneRow: { flexDirection: rowDirection, gap: 8, alignItems: 'flex-end' },
   prefix: {
     backgroundColor: 'hsl(200, 20%, 94%)',
     borderRadius: 12,
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
   prefixText: { color: PRIMARY },
   phoneInput: { flex: 1 },
 
-  divider: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  divider: { flexDirection: rowDirection, alignItems: 'center', gap: 8 },
   dividerLine: { flex: 1, height: 1, backgroundColor: 'hsl(198, 21%, 88%)' },
   dividerText: { color: 'hsl(198, 15%, 45%)' },
 });

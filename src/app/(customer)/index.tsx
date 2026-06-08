@@ -14,6 +14,7 @@ import { SegmentedControl } from '@/components/wasla/segmented-control';
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { useServices, useFeaturedServices } from '@/api/services/use-services';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 
@@ -29,9 +30,10 @@ export default function CustomerHomeScreen() {
   const { data: featured } = useFeaturedServices();
 
   const hour = new Date().getHours();
+  const fallbackName = t('home.default_name');
   const greeting = hour < 12
-    ? t('home.greeting_morning', { name: profile?.name?.split(' ')[0] ?? 'أختي' })
-    : t('home.greeting_evening', { name: profile?.name?.split(' ')[0] ?? 'أختي' });
+    ? t('home.greeting_morning', { name: profile?.name?.split(' ')[0] ?? fallbackName })
+    : t('home.greeting_evening', { name: profile?.name?.split(' ')[0] ?? fallbackName });
 
   const matchesCategory = (categoryId: string) =>
     activeCategory === 'all' || categoryId === activeCategory;
@@ -126,18 +128,18 @@ export default function CustomerHomeScreen() {
 const styles = StyleSheet.create({
   header: { padding: 16, paddingTop: 8, gap: 12 },
   greetingRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  greeting: { fontSize: 22, color: 'hsl(199, 41%, 12%)', flex: 1, textAlign: 'right' },
+  greeting: { fontSize: 22, color: 'hsl(199, 41%, 12%)', flex: 1, textAlign: textAlignStart },
 
   searchContainer: { paddingHorizontal: 16, paddingBottom: 8 },
   toggleContainer: { paddingHorizontal: 16, paddingBottom: 12 },
 
   listContent: { paddingHorizontal: 16, gap: 4 },
-  sectionTitleRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, marginVertical: 4 },
-  sectionTitle: { fontSize: 17, color: 'hsl(199, 41%, 12%)', textAlign: 'right' },
-  featuredRow: { flexDirection: 'row-reverse', gap: 12, paddingVertical: 4 },
+  sectionTitleRow: { flexDirection: rowDirection, alignItems: 'center', gap: 6, marginVertical: 4 },
+  sectionTitle: { fontSize: 17, color: 'hsl(199, 41%, 12%)', textAlign: textAlignStart },
+  featuredRow: { flexDirection: rowDirection, gap: 12, paddingVertical: 4 },
   featuredCard: { width: 280 },
 });

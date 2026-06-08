@@ -11,6 +11,7 @@ import { Text } from '@/components/ui/text';
 import { BookingStepper } from '@/components/wasla/booking-stepper';
 import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { MOCK_SERVICES } from '@/api/fixtures/services';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 
@@ -43,11 +44,11 @@ export default function BookingConfirmationScreen() {
             <View style={styles.statusRow}>
               <Badge label={t('booking.status_pending')} variant="warning" />
               <View style={styles.statusInfo}>
-                <Text variant="body" weight="semibold" style={{ color: 'hsl(199, 41%, 12%)', textAlign: 'right' }}>
+                <Text variant="body" weight="semibold" style={{ color: 'hsl(199, 41%, 12%)', textAlign: textAlignStart }}>
                   {service.title}
                 </Text>
                 {provider && (
-                  <Text variant="caption" style={{ color: 'hsl(198, 15%, 45%)', textAlign: 'right' }}>
+                  <Text variant="caption" style={{ color: 'hsl(198, 15%, 45%)', textAlign: textAlignStart }}>
                     {provider.name}
                   </Text>
                 )}
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   checkmark: { fontSize: 36, color: PRIMARY, fontWeight: '700' },
   title: { textAlign: 'center', fontSize: 22, color: 'hsl(199, 41%, 12%)' },
   statusCard: { width: '100%', padding: 16 },
-  statusRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
+  statusRow: { flexDirection: rowDirection, alignItems: 'center', gap: 12 },
   statusInfo: { flex: 1, gap: 4 },
   buttons: { width: '100%', gap: 12 },
 });

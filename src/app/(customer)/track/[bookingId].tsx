@@ -37,6 +37,7 @@ import {
   toPosition,
 } from '@/lib/location';
 import { Camera, GeoJSONSource, Layer, MapView, Marker } from '@/lib/location/map';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_SOFT = 'hsl(258, 45%, 96%)';
@@ -139,9 +140,9 @@ export default function TrackScreen() {
   const activeIndex = STEP_ORDER.indexOf(tracking);
 
   const providerName
-    = provider?.name ?? PROVIDER_NAMES[booking?.providerId ?? ''] ?? 'مزود الخدمة';
+    = provider?.name ?? PROVIDER_NAMES[booking?.providerId ?? ''] ?? t('profile.role_provider');
   const serviceTitle
-    = service?.title ?? SERVICE_NAMES[booking?.serviceId ?? ''] ?? 'الخدمة';
+    = service?.title ?? SERVICE_NAMES[booking?.serviceId ?? ''] ?? t('common.service');
 
   const steps = useMemo(
     () => [
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'hsl(198, 21%, 92%)',
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 56,
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
   statusPillText: { color: PRIMARY },
 
   providerCard: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     padding: 12,
@@ -419,8 +420,8 @@ const styles = StyleSheet.create({
   },
   providerInitial: { color: PRIMARY, fontSize: 22 },
   providerInfo: { flex: 1, gap: 2 },
-  providerName: { color: DARK, textAlign: 'right' },
-  providerService: { color: MUTED, textAlign: 'right' },
+  providerName: { color: DARK, textAlign: textAlignStart },
+  providerService: { color: MUTED, textAlign: textAlignStart },
   ratingBox: {
     alignItems: 'center',
     backgroundColor: SURFACE,
@@ -430,11 +431,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   ratingLabel: { color: MUTED, fontSize: 11 },
-  ratingRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+  ratingRow: { flexDirection: rowDirection, alignItems: 'center', gap: 4 },
   ratingValue: { color: GOLD, fontSize: 14 },
 
   stepperRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
@@ -481,10 +482,10 @@ const styles = StyleSheet.create({
   stepLabel: { color: MUTED, textAlign: 'center', fontSize: 12 },
   stepLabelActive: { color: PRIMARY },
 
-  actionsRow: { flexDirection: 'row-reverse', gap: 10 },
+  actionsRow: { flexDirection: rowDirection, gap: 10 },
   actionBtn: {
     flex: 1,
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

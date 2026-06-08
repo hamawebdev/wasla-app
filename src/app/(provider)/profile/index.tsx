@@ -4,7 +4,6 @@ import {
   BadgeCheck,
   Bell,
   Camera,
-  ChevronLeft,
   Eye,
   HelpCircle,
   Languages,
@@ -29,8 +28,13 @@ import { useTranslation } from 'react-i18next';
 import { showMessage } from 'react-native-flash-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
+import { LanguageSheet } from '@/components/wasla/language-sheet';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useSelectedLanguage } from '@/lib/i18n';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_DARK = 'hsl(258, 52%, 38%)';
@@ -44,6 +48,12 @@ const MUTED = 'hsl(198, 15%, 45%)';
 const OUTLINE = 'hsl(198, 21%, 88%)';
 const ERROR = 'hsl(0, 84%, 56%)';
 const ERROR_SOFT = 'hsl(0, 84%, 96%)';
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  ar: 'العربية',
+  en: 'English',
+  fr: 'Français',
+};
 
 const WALLET_BALANCE = '150 د.ج';
 const APP_VERSION =
@@ -69,6 +79,10 @@ export default function ProviderProfileScreen() {
   const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
   const profile = useAuthStore.use.profile();
+  const { language } = useSelectedLanguage();
+
+  const [langSheetOpen, setLangSheetOpen] = React.useState(false);
+  const currentLanguageLabel = LANGUAGE_LABELS[language ?? 'ar'] ?? LANGUAGE_LABELS.ar;
 
   const userName = profile?.name ?? 'أم رشيد';
   const userAvatar = profile?.avatar;
@@ -76,7 +90,7 @@ export default function ProviderProfileScreen() {
   const handleSignOut = () => {
     signOut();
     router.replace('/account-picker' as any);
-    showMessage({ message: 'تم تسجيل الخروج', type: 'info' });
+    showMessage({ message: t('profile.logged_out'), type: 'info' });
   };
 
   return (
@@ -101,7 +115,7 @@ export default function ProviderProfileScreen() {
               style={styles.cameraBtn}
               onPress={() => router.push('/(shared)/profile/edit')}
               hitSlop={8}
-              accessibilityLabel="تغيير صورة الملف الشخصي"
+              accessibilityLabel={t('editProfile.change_photo')}
             >
               <Camera size={16} color="#fff" strokeWidth={2.2} />
             </Pressable>
@@ -128,7 +142,7 @@ export default function ProviderProfileScreen() {
             <View style={styles.heroTitleRow}>
               <TrendingUp size={20} color="#fff" strokeWidth={2} />
               <Text variant="body" weight="semibold" style={styles.heroTitle}>
-                إحصائياتي
+                {t('provider.my_stats')}
               </Text>
             </View>
           </View>
@@ -139,17 +153,17 @@ export default function ProviderProfileScreen() {
                 <Star size={16} color={ACCENT_GOLD} fill={ACCENT_GOLD} strokeWidth={1.8} />
                 <Text style={styles.statValue}>{PROVIDER_RATING}</Text>
               </View>
-              <Text style={styles.statLabel}>التقييم</Text>
+              <Text style={styles.statLabel}>{t('providerPublic.rating')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statCell}>
               <Text style={styles.statValue}>{PROVIDER_REVIEWS}</Text>
-              <Text style={styles.statLabel}>المراجعات</Text>
+              <Text style={styles.statLabel}>{t('providerPublic.tab_reviews')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statCell}>
               <Text style={styles.statValue}>{PROVIDER_SERVICES}</Text>
-              <Text style={styles.statLabel}>الخدمات</Text>
+              <Text style={styles.statLabel}>{t('providerPublic.tab_services')}</Text>
             </View>
           </View>
         </View>
@@ -158,7 +172,7 @@ export default function ProviderProfileScreen() {
         <Pressable
           style={styles.heroCard}
           onPress={() => {}}
-          accessibilityLabel="نقاط مزود الخدمة"
+          accessibilityLabel={t('loyalty.rewards_points')}
         >
           <View style={styles.heroBlob1} />
           <View style={styles.heroBlob2} />
@@ -167,17 +181,17 @@ export default function ProviderProfileScreen() {
             <View style={styles.heroTitleRow}>
               <Sparkles size={20} color="#fff" fill="#fff" strokeWidth={1.8} />
               <Text variant="body" weight="semibold" style={styles.heroTitle}>
-                نقاط المزود
+                {t('loyalty.rewards_points')}
               </Text>
             </View>
-            <ChevronLeft size={20} color="rgba(255,255,255,0.75)" />
+            <ChevronForward size={20} color="rgba(255,255,255,0.75)" />
           </View>
 
           <View style={styles.pointsValueRow}>
             <Text style={styles.pointsValue}>
-              {PROVIDER_POINTS.toLocaleString('ar-DZ')}
+              {formatNumber(PROVIDER_POINTS)}
             </Text>
-            <Text style={styles.pointsUnit}>نقطة</Text>
+            <Text style={styles.pointsUnit}>{t('loyalty.points_unit')}</Text>
           </View>
 
           <View style={styles.progressTrack}>
@@ -186,10 +200,10 @@ export default function ProviderProfileScreen() {
 
           <View style={styles.progressLabels}>
             <Text style={styles.progressLabel}>
-              {`المستوى الحالي ${PROVIDER_TIER_NAME}`}
+              {t('loyalty.current_tier', { tier: PROVIDER_TIER_NAME })}
             </Text>
             <Text style={styles.progressLabel}>
-              {`باقي ${PROVIDER_NEXT_TIER_POINTS} للمستوى ${PROVIDER_NEXT_TIER_NAME}`}
+              {t('loyalty.points_to_next_tier', { points: PROVIDER_NEXT_TIER_POINTS, tier: PROVIDER_NEXT_TIER_NAME })}
             </Text>
           </View>
         </Pressable>
@@ -206,7 +220,7 @@ export default function ProviderProfileScreen() {
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<Star size={20} color={PRIMARY} />}
-            label="تقييماتي"
+            label={t('provider.my_reviews')}
             onPress={() => {}}
             showDivider
           />
@@ -220,7 +234,7 @@ export default function ProviderProfileScreen() {
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<Wallet size={20} color={PRIMARY} />}
-            label="المحفظة"
+            label={t('wallet.title')}
             onPress={() => router.push('/(shared)/wallet')}
             trailing={
               <View style={styles.walletBadge}>
@@ -237,7 +251,7 @@ export default function ProviderProfileScreen() {
           <Row
             iconBg={PRIMARY_TINT}
             icon={<Eye size={20} color={PRIMARY_DARK} />}
-            label="معاينة كعميل"
+            label={t('providerPublic.preview_title')}
             onPress={() => router.push('/(provider)/profile/preview')}
             showDivider
           />
@@ -262,15 +276,10 @@ export default function ProviderProfileScreen() {
             iconBg={PRIMARY_TINT}
             icon={<Languages size={20} color={PRIMARY_DARK} />}
             label={t('profile.language')}
-            onPress={() => {
-              showMessage({
-                message: 'العربية هي اللغة الوحيدة المتاحة حالياً',
-                type: 'info',
-              });
-            }}
+            onPress={() => setLangSheetOpen(true)}
             trailing={
               <Text variant="label" style={styles.trailingText}>
-                العربية
+                {currentLanguageLabel}
               </Text>
             }
           />
@@ -296,9 +305,14 @@ export default function ProviderProfileScreen() {
         </View>
 
         <Text variant="caption" style={styles.version}>
-          {`الإصدار ${APP_VERSION}`}
+          {`${t('settings.version')} ${APP_VERSION}`}
         </Text>
       </ScrollView>
+
+      <LanguageSheet
+        isOpen={langSheetOpen}
+        onClose={() => setLangSheetOpen(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -351,9 +365,9 @@ function Row({
       <View style={styles.rowTrailing}>
         {trailing}
         {!hideChevron && !trailing ? (
-          <ChevronLeft size={20} color={MUTED} />
+          <ChevronForward size={20} color={MUTED} />
         ) : !hideChevron && trailing ? (
-          <ChevronLeft size={18} color={MUTED} />
+          <ChevronForward size={18} color={MUTED} />
         ) : null}
       </View>
     </View>
@@ -430,7 +444,7 @@ const styles = StyleSheet.create({
   },
   name: { color: DARK, textAlign: 'center', fontSize: 22 },
   tierChip: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 6,
     backgroundColor: PRIMARY_TINT,
@@ -471,12 +485,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   heroHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   heroTitleRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 8,
   },
@@ -484,7 +498,7 @@ const styles = StyleSheet.create({
 
   /* Stats card */
   statsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 14,
@@ -492,7 +506,7 @@ const styles = StyleSheet.create({
   },
   statCell: { flex: 1, alignItems: 'center', gap: 4 },
   statValueRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 4,
   },
@@ -506,7 +520,7 @@ const styles = StyleSheet.create({
 
   /* Points card */
   pointsValueRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'baseline',
     gap: 6,
     marginTop: 10,
@@ -526,7 +540,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   progressLabels: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     marginTop: 8,
   },
@@ -546,7 +560,7 @@ const styles = StyleSheet.create({
 
   /* Rows */
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
@@ -555,7 +569,7 @@ const styles = StyleSheet.create({
   },
   rowDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: OUTLINE },
   rowLeading: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     flex: 1,
@@ -569,9 +583,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowLabelWrap: { flex: 1, minWidth: 0, gap: 2 },
-  rowLabel: { color: DARK, textAlign: 'right' },
-  rowSublabel: { color: MUTED, textAlign: 'right', fontSize: 12 },
-  rowTrailing: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  rowLabel: { color: DARK, textAlign: textAlignStart },
+  rowSublabel: { color: MUTED, textAlign: textAlignStart, fontSize: 12 },
+  rowTrailing: { flexDirection: rowDirection, alignItems: 'center', gap: 8 },
   rowPressed: { backgroundColor: 'rgba(0,0,0,0.025)' },
 
   walletBadge: {

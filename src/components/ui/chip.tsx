@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PressableProps } from 'react-native';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { rowDirection } from '@/lib/rtl';
 
 interface Props extends PressableProps {
   label: string;
@@ -10,6 +12,7 @@ interface Props extends PressableProps {
 }
 
 export function Chip({ label, selected = false, onRemove, icon, ...props }: Props) {
+  const { t } = useTranslation();
   return (
     <Pressable
       accessibilityRole="button"
@@ -20,7 +23,7 @@ export function Chip({ label, selected = false, onRemove, icon, ...props }: Prop
       {icon && <>{icon}</>}
       <Text style={[styles.label, selected && styles.selectedLabel]}>{label}</Text>
       {onRemove && (
-        <Pressable onPress={onRemove} hitSlop={8} accessibilityLabel="إزالة">
+        <Pressable onPress={onRemove} hitSlop={8} accessibilityLabel={t('common.remove')}>
           <Text style={[styles.remove, selected && styles.selectedLabel]}>✕</Text>
         </Pressable>
       )}
@@ -30,7 +33,7 @@ export function Chip({ label, selected = false, onRemove, icon, ...props }: Prop
 
 const styles = StyleSheet.create({
   base: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 14,

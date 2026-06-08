@@ -1,9 +1,11 @@
 import { useRouter } from 'expo-router';
 import { Megaphone, Plus, X } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const FOREGROUND = 'hsl(199, 41%, 12%)';
@@ -36,6 +38,7 @@ function ActionRow({ icon, label, onPress }: ActionRowProps) {
 }
 
 export function ProviderActionSheet({ visible, onClose }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -65,7 +68,7 @@ export function ProviderActionSheet({ visible, onClose }: Props) {
         {/* Title */}
         <View style={styles.header}>
           <Text variant="heading" weight="semibold" style={styles.title}>
-            إضافة جديد
+            {t('provider.add_new')}
           </Text>
           <Pressable onPress={onClose} hitSlop={12} style={styles.closeBtn}>
             <X size={20} color={MUTED} />
@@ -74,12 +77,12 @@ export function ProviderActionSheet({ visible, onClose }: Props) {
 
         <ActionRow
           icon={<Plus size={22} color={PRIMARY} />}
-          label="خدمة جديدة"
+          label={t('provider.new_service')}
           onPress={handleAddService}
         />
         <ActionRow
           icon={<Megaphone size={22} color={PRIMARY} />}
-          label="عرض ترويجي"
+          label={t('provider.new_promotion')}
           onPress={handlePromote}
         />
       </View>
@@ -113,7 +116,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 16,
     paddingVertical: 16,
@@ -146,6 +149,6 @@ const styles = StyleSheet.create({
   rowLabel: {
     color: FOREGROUND,
     flex: 1,
-    textAlign: 'right',
+    textAlign: textAlignStart,
   },
 });

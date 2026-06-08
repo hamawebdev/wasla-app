@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Star, TrendingUp, Users } from 'lucide-react-native';
+import { Star, TrendingUp, Users } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -7,11 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { CUSTOMER_NAMES, SERVICE_NAMES } from '@/api/fixtures/bookings';
 import { useBookingsStore } from '@/lib/stores/bookings';
 import type { Booking } from '@/api/types';
+import { formatDate } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -23,11 +26,10 @@ const PROVIDER_ID = 'p1';
 const LATEST_LIMIT = 3;
 
 const TODAY = new Date('2026-05-10');
-const ARABIC_DAYS = ['أ', 'ث', 'ر', 'خ', 'ج', 'س', 'أ'];
 const WEEK_DAYS = Array.from({ length: 7 }, (_, i) => {
   const d = new Date(TODAY);
   d.setDate(d.getDate() - TODAY.getDay() + i);
-  return { day: ARABIC_DAYS[i], date: d.getDate(), isToday: d.getDate() === TODAY.getDate() };
+  return { iso: d.toISOString(), date: d.getDate(), isToday: d.getDate() === TODAY.getDate() };
 });
 
 export default function ProviderDashboard() {
@@ -44,7 +46,7 @@ export default function ProviderDashboard() {
     .slice(0, LATEST_LIMIT);
 
   const renderReservation = (booking: Booking) => {
-    const customerName = CUSTOMER_NAMES[booking.customerId] ?? 'عميلة';
+    const customerName = CUSTOMER_NAMES[booking.customerId] ?? t('profile.role_customer');
     return (
       <Pressable
         key={booking.id}
@@ -57,7 +59,7 @@ export default function ProviderDashboard() {
             {customerName}
           </Text>
           <Text variant="caption" numberOfLines={1} style={styles.serviceName}>
-            {SERVICE_NAMES[booking.serviceId] ?? 'خدمة'}
+            {SERVICE_NAMES[booking.serviceId] ?? t('common.service')}
           </Text>
           <Text variant="caption" style={styles.dateTime}>
             {booking.date} — {booking.time}
@@ -65,7 +67,7 @@ export default function ProviderDashboard() {
         </View>
         <View style={styles.reservationTrailing}>
           <Badge label={t('provider.clients_new')} variant="warning" />
-          <ChevronLeft size={16} color={MUTED} />
+          <ChevronForward size={16} color={MUTED} />
         </View>
       </Pressable>
     );
@@ -118,13 +120,13 @@ export default function ProviderDashboard() {
       {/* Weekly calendar strip */}
       <Card style={styles.calendarCard}>
         <Text variant="label" weight="semibold" style={styles.sectionTitle}>
-          أوقات الإتاحة هذا الأسبوع
+          {t('provider.availability_week')}
         </Text>
         <View style={styles.weekStrip}>
           {WEEK_DAYS.map((d) => (
             <View key={d.date} style={[styles.dayCol, d.isToday && styles.dayColToday]}>
               <Text variant="caption" style={[styles.dayLabel, d.isToday && { color: '#fff' }]}>
-                {d.day}
+                {formatDate(d.iso, { weekday: 'narrow' })}
               </Text>
               <Text variant="caption" style={[styles.dayNum, d.isToday && { color: '#fff' }]}>
                 {d.date}
@@ -137,7 +139,7 @@ export default function ProviderDashboard() {
           onPress={() => router.push('/(provider)/clients')}
         >
           <Text variant="label" weight="semibold" style={{ color: PRIMARY }}>
-            عرض الطلبات الجديدة ({pendingCount})
+            {t('provider.view_new_requests', { count: pendingCount })}
           </Text>
         </Pressable>
       </Card>
@@ -175,15 +177,15 @@ export default function ProviderDashboard() {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
     paddingBottom: 12,
   },
   headerText: { alignItems: 'flex-end', gap: 2 },
-  greeting: { textAlign: 'right', color: DARK, fontSize: 18 },
-  subtitle: { color: MUTED, textAlign: 'right' },
+  greeting: { textAlign: textAlignStart, color: DARK, fontSize: 18 },
+  subtitle: { color: MUTED, textAlign: textAlignStart },
   newBadge: {
     width: 28,
     height: 28,
@@ -195,7 +197,7 @@ const styles = StyleSheet.create({
   newBadgeText: { color: '#fff', fontSize: 13, fontFamily: 'Rubik', fontWeight: '700' },
 
   statsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     paddingHorizontal: 16,
     gap: 10,
     marginBottom: 12,
@@ -210,7 +212,7 @@ const styles = StyleSheet.create({
   statLabel: { textAlign: 'center', color: MUTED, fontSize: 11 },
 
   calendarCard: { marginHorizontal: 16, gap: 12, marginBottom: 12 },
-  weekStrip: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
+  weekStrip: { flexDirection: rowDirection, justifyContent: 'space-between' },
   dayCol: {
     flex: 1,
     alignItems: 'center',
@@ -229,12 +231,12 @@ const styles = StyleSheet.create({
   },
 
   section: { paddingHorizontal: 16, gap: 8 },
-  sectionHeader: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
-  sectionTitle: { textAlign: 'right', color: DARK, fontSize: 16, marginBottom: 4 },
+  sectionHeader: { flexDirection: rowDirection, alignItems: 'center', justifyContent: 'space-between' },
+  sectionTitle: { textAlign: textAlignStart, color: DARK, fontSize: 16, marginBottom: 4 },
   emptyText: { textAlign: 'center', color: MUTED, padding: 20 },
 
   reservationRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     backgroundColor: '#fff',
@@ -247,9 +249,9 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   reservationInfo: { flex: 1, gap: 2 },
-  customerName: { textAlign: 'right', color: DARK },
-  serviceName: { textAlign: 'right', color: MUTED },
-  dateTime: { textAlign: 'right', color: MUTED, fontSize: 11 },
+  customerName: { textAlign: textAlignStart, color: DARK },
+  serviceName: { textAlign: textAlignStart, color: MUTED },
+  dateTime: { textAlign: textAlignStart, color: MUTED, fontSize: 11 },
   reservationTrailing: { alignItems: 'flex-end', gap: 6 },
 
   showAllBtn: {

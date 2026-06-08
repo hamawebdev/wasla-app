@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { BadgeCheck, MapPin, Star } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   Pressable,
@@ -15,6 +16,8 @@ import { Card } from '@/components/ui/card';
 import { StarRating } from '@/components/ui/star-rating';
 import { Text } from '@/components/ui/text';
 import { useProviderById, useServices, useServiceReviews } from '@/api/services/use-services';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -30,9 +33,9 @@ const BORDER = 'hsl(198, 21%, 88%)';
 const COVER_IMAGE = 'https://picsum.photos/seed/wasla-cover/800/400';
 
 const TABS = [
-  { key: 'services', label: 'الخدمات' },
-  { key: 'reviews', label: 'التقييمات' },
-  { key: 'about', label: 'حول' },
+  { key: 'services', label: 'providerPublic.tab_services' },
+  { key: 'reviews', label: 'providerPublic.tab_reviews' },
+  { key: 'about', label: 'providerPublic.tab_about' },
 ] as const;
 
 type TabKey = (typeof TABS)[number]['key'];
@@ -43,6 +46,7 @@ interface Props {
 }
 
 export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>('services');
 
@@ -56,7 +60,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
   if (!provider) {
     return (
       <View style={styles.loading}>
-        <Text variant="body" style={{ color: MUTED }}>جارٍ التحميل...</Text>
+        <Text variant="body" style={{ color: MUTED }}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -68,7 +72,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
       {mode === 'preview' && (
         <View style={styles.previewBanner}>
           <Text variant="caption" weight="medium" style={styles.previewText}>
-            أنتِ تشاهدين متجرك كما يراه العملاء
+            {t('providerPublic.preview_banner')}
           </Text>
         </View>
       )}
@@ -113,7 +117,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
             <Text variant="heading" weight="bold" style={styles.statValue}>
               {providerServices.length}
             </Text>
-            <Text variant="caption" style={styles.statLabel}>خدمة</Text>
+            <Text variant="caption" style={styles.statLabel}>{t('providerPublic.tab_services')}</Text>
           </View>
           <View style={styles.statTile}>
             <View style={styles.ratingRow}>
@@ -122,11 +126,11 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
               </Text>
               <Star size={16} color={TERTIARY} fill={TERTIARY} />
             </View>
-            <Text variant="caption" style={styles.statLabel}>التقييم</Text>
+            <Text variant="caption" style={styles.statLabel}>{t('providerPublic.rating')}</Text>
           </View>
           <View style={styles.statTile}>
             <Text variant="heading" weight="bold" style={styles.statValue}>95%</Text>
-            <Text variant="caption" style={styles.statLabel}>الاستجابة</Text>
+            <Text variant="caption" style={styles.statLabel}>{t('providerPublic.response_rate')}</Text>
           </View>
         </View>
 
@@ -152,7 +156,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
                   weight={active ? 'semibold' : 'medium'}
                   style={[styles.tabLabel, active && styles.tabLabelActive]}
                 >
-                  {tab.label}
+                  {t(tab.label)}
                 </Text>
                 {active && <View style={styles.tabIndicator} />}
               </Pressable>
@@ -164,7 +168,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
         {activeTab === 'services' && (
           <View style={styles.servicesGrid}>
             {providerServices.length === 0 && (
-              <Text variant="body" style={styles.emptyText}>لا توجد خدمات بعد</Text>
+              <Text variant="body" style={styles.emptyText}>{t('providerPublic.no_services')}</Text>
             )}
             {providerServices.map((service) => (
               <Pressable
@@ -181,7 +185,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
                   {service.featured && (
                     <View style={styles.serviceBadge}>
                       <Text variant="caption" weight="medium" style={styles.serviceBadgeText}>
-                        مطلوب بكثرة
+                        {t('providerPublic.in_demand')}
                       </Text>
                     </View>
                   )}
@@ -196,7 +200,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
                     {service.title}
                   </Text>
                   <Text variant="caption" weight="medium" style={styles.servicePrice}>
-                    {service.priceFrom ? 'من ' : ''}{service.price} د.ج
+                    {service.priceFrom ? `${t('common.starting_from')} ` : ''}{formatNumber(service.price)} {t('common.dzd')}
                   </Text>
                 </View>
               </Pressable>
@@ -207,23 +211,23 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
         {activeTab === 'reviews' && (
           <View style={styles.tabContent}>
             {reviews.length === 0 && (
-              <Text variant="body" style={styles.emptyText}>لا توجد تقييمات بعد</Text>
+              <Text variant="body" style={styles.emptyText}>{t('providerPublic.no_reviews')}</Text>
             )}
             {reviews.map((review) => (
               <Card key={review.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
                   <View style={styles.reviewMeta}>
-                    <Text variant="label" weight="semibold" style={{ color: FOREGROUND, textAlign: 'right' }}>
+                    <Text variant="label" weight="semibold" style={{ color: FOREGROUND, textAlign: textAlignStart }}>
                       {review.authorName}
                     </Text>
-                    <Text variant="caption" style={{ color: MUTED, textAlign: 'right' }}>
+                    <Text variant="caption" style={{ color: MUTED, textAlign: textAlignStart }}>
                       {review.date}
                     </Text>
                   </View>
                   <Avatar name={review.authorName} size={36} />
                 </View>
                 <StarRating value={review.rating} size={14} />
-                <Text variant="body" style={{ color: FOREGROUND, textAlign: 'right' }}>
+                <Text variant="body" style={{ color: FOREGROUND, textAlign: textAlignStart }}>
                   {review.comment}
                 </Text>
               </Card>
@@ -235,10 +239,10 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
           <View style={styles.tabContent}>
             <Card>
               <Text variant="body" weight="semibold" style={styles.aboutTitle}>
-                نبذة عني
+                {t('providerPublic.about')}
               </Text>
-              <Text variant="body" style={{ color: MUTED, textAlign: 'right', lineHeight: 26 }}>
-                {provider.bio ?? 'لا توجد نبذة حالياً.'}
+              <Text variant="body" style={{ color: MUTED, textAlign: textAlignStart, lineHeight: 26 }}>
+                {provider.bio ?? t('providerPublic.no_bio')}
               </Text>
             </Card>
           </View>
@@ -250,7 +254,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
       {mode === 'public' && (
         <View style={styles.stickyBottom}>
           <Button
-            label="تواصل معي"
+            label={t('providerPublic.contact')}
             variant="outline"
             size="md"
             style={styles.ctaBtn}
@@ -258,7 +262,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
           />
           {firstService && (
             <Button
-              label="احجزي الآن"
+              label={t('providerPublic.book_now')}
               variant="primary"
               size="md"
               style={styles.ctaBtn}
@@ -303,12 +307,12 @@ const styles = StyleSheet.create({
   },
 
   providerInfo: { paddingHorizontal: 16, paddingTop: 52, paddingBottom: 8 },
-  nameRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  providerName: { color: FOREGROUND, textAlign: 'right', fontSize: 22 },
-  cityRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 4 },
+  nameRow: { flexDirection: rowDirection, alignItems: 'center', gap: 6 },
+  providerName: { color: FOREGROUND, textAlign: textAlignStart, fontSize: 22 },
+  cityRow: { flexDirection: rowDirection, alignItems: 'center', gap: 4, marginTop: 4 },
 
   statsGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -324,15 +328,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ratingRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+  ratingRow: { flexDirection: rowDirection, alignItems: 'center', gap: 4 },
   statValue: { color: PRIMARY, fontSize: 22 },
   statLabel: { color: MUTED, marginTop: 2, fontSize: 12 },
 
   bioSection: { paddingHorizontal: 16, paddingVertical: 8 },
-  bioText: { color: MUTED, textAlign: 'right', lineHeight: 26 },
+  bioText: { color: MUTED, textAlign: textAlignStart, lineHeight: 26 },
 
   tabsBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     backgroundColor: BG,
     borderBottomWidth: 1,
     borderBottomColor: BORDER,
@@ -356,7 +360,7 @@ const styles = StyleSheet.create({
   },
 
   servicesGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     flexWrap: 'wrap',
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -383,7 +387,7 @@ const styles = StyleSheet.create({
   },
   serviceBadgeText: { color: PRIMARY, fontSize: 10 },
   serviceBody: { padding: 10, gap: 6 },
-  serviceTitle: { color: FOREGROUND, textAlign: 'right', minHeight: 36 },
+  serviceTitle: { color: FOREGROUND, textAlign: textAlignStart, minHeight: 36 },
   servicePrice: { color: PRIMARY },
 
   tabContent: { paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
@@ -391,15 +395,15 @@ const styles = StyleSheet.create({
 
   reviewCard: { gap: 10 },
   reviewHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   reviewMeta: { gap: 2 },
-  aboutTitle: { color: FOREGROUND, textAlign: 'right', marginBottom: 8 },
+  aboutTitle: { color: FOREGROUND, textAlign: textAlignStart, marginBottom: 8 },
 
   stickyBottom: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 12,
     padding: 16,
     backgroundColor: SURFACE,

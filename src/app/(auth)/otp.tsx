@@ -10,6 +10,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { signIn } from '@/features/auth/use-auth-store';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { rowDirection } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const OTP_LENGTH = 6;
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   },
   devHintText: { color: PRIMARY, textAlign: 'center' },
 
-  otpRow: { flexDirection: 'row-reverse', gap: 10 },
+  otpRow: { flexDirection: rowDirection, gap: 10 },
   otpBox: {
     width: 48,
     height: 56,

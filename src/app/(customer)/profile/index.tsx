@@ -5,7 +5,6 @@ import {
   Bell,
   Camera,
   CalendarDays,
-  ChevronLeft,
   Heart,
   HelpCircle,
   Languages,
@@ -17,6 +16,7 @@ import {
   Wallet,
 } from 'lucide-react-native';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   Pressable,
@@ -28,8 +28,11 @@ import {
 import { showMessage } from 'react-native-flash-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ChevronForward } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
+import { LanguageSheet } from '@/components/wasla/language-sheet';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useSelectedLanguage } from '@/lib/i18n';
 import { useSelectedTheme } from '@/lib/hooks/use-selected-theme';
 import {
   MOCK_NEXT_TIER_NAME,
@@ -37,6 +40,8 @@ import {
   MOCK_TIER_NAME,
   MOCK_USER_POINTS,
 } from '@/api/fixtures/loyalty';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_DARK = 'hsl(258, 52%, 38%)';
@@ -51,6 +56,12 @@ const OUTLINE = 'hsl(198, 21%, 88%)';
 const ERROR = 'hsl(0, 84%, 56%)';
 const ERROR_SOFT = 'hsl(0, 84%, 96%)';
 
+const LANGUAGE_LABELS: Record<string, string> = {
+  ar: 'العربية',
+  en: 'English',
+  fr: 'Français',
+};
+
 const WALLET_BALANCE = '150 د.ج';
 const APP_VERSION =
   (Constants?.expoConfig?.version as string | undefined) ?? '2.4.1';
@@ -62,13 +73,17 @@ const PROGRESS_PCT = (() => {
 })();
 
 export default function CustomerProfileScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const signOut = useAuthStore((s) => s.signOut);
   const profile = useAuthStore.use.profile();
   const { selectedTheme, setSelectedTheme } = useSelectedTheme();
+  const { language } = useSelectedLanguage();
 
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+  const [langSheetOpen, setLangSheetOpen] = React.useState(false);
   const isDark = selectedTheme === 'dark';
+  const currentLanguageLabel = LANGUAGE_LABELS[language ?? 'ar'] ?? LANGUAGE_LABELS.ar;
 
   const userName = profile?.name ?? 'أحمد بن علي';
   const userAvatar = profile?.avatar;
@@ -76,7 +91,7 @@ export default function CustomerProfileScreen() {
   const handleSignOut = () => {
     signOut();
     router.replace('/account-picker' as any);
-    showMessage({ message: 'تم تسجيل الخروج', type: 'info' });
+    showMessage({ message: t('profile.logged_out'), type: 'info' });
   };
 
   const toggleDarkMode = (next: boolean) => {
@@ -105,7 +120,7 @@ export default function CustomerProfileScreen() {
               style={styles.cameraBtn}
               onPress={() => router.push('/(shared)/profile/edit')}
               hitSlop={8}
-              accessibilityLabel="تغيير صورة الملف الشخصي"
+              accessibilityLabel={t('editProfile.change_photo')}
             >
               <Camera size={16} color="#fff" strokeWidth={2.2} />
             </Pressable>
@@ -118,7 +133,7 @@ export default function CustomerProfileScreen() {
           <View style={styles.tierChip}>
             <BadgeCheck size={14} color={PRIMARY} fill={PRIMARY_TINT} strokeWidth={2.2} />
             <Text variant="label" weight="medium" style={styles.tierChipText}>
-              عميل مميز
+              {t('profile.premium_customer')}
             </Text>
           </View>
         </View>
@@ -127,7 +142,7 @@ export default function CustomerProfileScreen() {
         <Pressable
           style={styles.pointsCard}
           onPress={() => router.push('/(customer)/loyalty')}
-          accessibilityLabel="نقاط المكافآت"
+          accessibilityLabel={t('loyalty.rewards_points')}
         >
           <View style={styles.pointsBlob1} />
           <View style={styles.pointsBlob2} />
@@ -136,17 +151,17 @@ export default function CustomerProfileScreen() {
             <View style={styles.pointsTitleRow}>
               <Sparkles size={20} color="#fff" fill="#fff" strokeWidth={1.8} />
               <Text variant="body" weight="semibold" style={styles.pointsTitle}>
-                نقاط المكافآت
+                {t('loyalty.rewards_points')}
               </Text>
             </View>
-            <ChevronLeft size={20} color="rgba(255,255,255,0.75)" />
+            <ChevronForward size={20} color="rgba(255,255,255,0.75)" />
           </View>
 
           <View style={styles.pointsValueRow}>
             <Text style={styles.pointsValue}>
-              {MOCK_USER_POINTS.toLocaleString('ar-DZ')}
+              {formatNumber(MOCK_USER_POINTS)}
             </Text>
-            <Text style={styles.pointsUnit}>نقطة</Text>
+            <Text style={styles.pointsUnit}>{t('loyalty.points_unit')}</Text>
           </View>
 
           <View style={styles.progressTrack}>
@@ -155,10 +170,10 @@ export default function CustomerProfileScreen() {
 
           <View style={styles.progressLabels}>
             <Text style={styles.progressLabel}>
-              {`المستوى الحالي ${MOCK_TIER_NAME}`}
+              {t('loyalty.current_tier', { tier: MOCK_TIER_NAME })}
             </Text>
             <Text style={styles.progressLabel}>
-              {`باقي ${MOCK_NEXT_TIER_POINTS} للمستوى ${MOCK_NEXT_TIER_NAME}`}
+              {t('loyalty.points_to_next_tier', { points: MOCK_NEXT_TIER_POINTS, tier: MOCK_NEXT_TIER_NAME })}
             </Text>
           </View>
         </Pressable>
@@ -168,35 +183,35 @@ export default function CustomerProfileScreen() {
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<User size={20} color={PRIMARY} />}
-            label="المعلومات الشخصية"
+            label={t('profile.personal_info')}
             onPress={() => router.push('/(shared)/profile/edit')}
             showDivider
           />
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<CalendarDays size={20} color={PRIMARY} />}
-            label="حجوزاتي"
+            label={t('profile.my_bookings')}
             onPress={() => router.push('/(customer)/bookings')}
             showDivider
           />
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<Heart size={20} color={PRIMARY} />}
-            label="المفضلة"
+            label={t('favorites.title')}
             onPress={() => router.push('/(customer)/favorites')}
             showDivider
           />
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<MapPin size={20} color={PRIMARY} />}
-            label="العناوين المحفوظة"
+            label={t('profile.addresses')}
             onPress={() => router.push('/(shared)/addresses')}
             showDivider
           />
           <Row
             iconBg={PRIMARY_SOFT}
             icon={<Wallet size={20} color={PRIMARY} />}
-            label="المحفظة"
+            label={t('wallet.title')}
             onPress={() => router.push('/(shared)/wallet')}
             trailing={
               <View style={styles.walletBadge}>
@@ -213,8 +228,8 @@ export default function CustomerProfileScreen() {
           <Row
             iconBg={PRIMARY_TINT}
             icon={<Bell size={20} color={PRIMARY_DARK} />}
-            label="الإشعارات"
-            sublabel="تلقي تنبيهات الحجوزات والعروض"
+            label={t('profile.notifications')}
+            sublabel={t('profile.notifications_sub')}
             trailing={
               <Switch
                 value={notificationsEnabled}
@@ -230,16 +245,11 @@ export default function CustomerProfileScreen() {
           <Row
             iconBg={PRIMARY_TINT}
             icon={<Languages size={20} color={PRIMARY_DARK} />}
-            label="لغة التطبيق"
-            onPress={() => {
-              showMessage({
-                message: 'العربية هي اللغة الوحيدة المتاحة حالياً',
-                type: 'info',
-              });
-            }}
+            label={t('profile.language')}
+            onPress={() => setLangSheetOpen(true)}
             trailing={
               <Text variant="label" style={styles.trailingText}>
-                العربية
+                {currentLanguageLabel}
               </Text>
             }
             showDivider
@@ -247,7 +257,7 @@ export default function CustomerProfileScreen() {
           <Row
             iconBg={PRIMARY_TINT}
             icon={<Moon size={20} color={PRIMARY_DARK} />}
-            label="الوضع الليلي"
+            label={t('profile.dark_mode')}
             trailing={
               <Switch
                 value={isDark}
@@ -266,14 +276,14 @@ export default function CustomerProfileScreen() {
           <Row
             iconBg={PRIMARY_TINT}
             icon={<HelpCircle size={20} color={PRIMARY_DARK} />}
-            label="مركز المساعدة"
+            label={t('profile.help')}
             onPress={() => router.push('/(shared)/help')}
             showDivider
           />
           <Row
             iconBg={ERROR_SOFT}
             icon={<LogOut size={20} color={ERROR} />}
-            label="تسجيل الخروج"
+            label={t('profile.logout')}
             labelColor={ERROR}
             onPress={handleSignOut}
             hideChevron
@@ -281,9 +291,14 @@ export default function CustomerProfileScreen() {
         </View>
 
         <Text variant="caption" style={styles.version}>
-          {`الإصدار ${APP_VERSION}`}
+          {`${t('settings.version')} ${APP_VERSION}`}
         </Text>
       </ScrollView>
+
+      <LanguageSheet
+        isOpen={langSheetOpen}
+        onClose={() => setLangSheetOpen(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -336,9 +351,9 @@ function Row({
       <View style={styles.rowTrailing}>
         {trailing}
         {!hideChevron && !trailing ? (
-          <ChevronLeft size={20} color={MUTED} />
+          <ChevronForward size={20} color={MUTED} />
         ) : !hideChevron && trailing ? (
-          <ChevronLeft size={18} color={MUTED} />
+          <ChevronForward size={18} color={MUTED} />
         ) : null}
       </View>
     </View>
@@ -415,7 +430,7 @@ const styles = StyleSheet.create({
   },
   name: { color: DARK, textAlign: 'center', fontSize: 22 },
   tierChip: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 6,
     backgroundColor: PRIMARY_TINT,
@@ -456,18 +471,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   pointsHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   pointsTitleRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 8,
   },
   pointsTitle: { color: '#fff', fontSize: 18 },
   pointsValueRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'baseline',
     gap: 6,
     marginTop: 10,
@@ -487,7 +502,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   progressLabels: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     justifyContent: 'space-between',
     marginTop: 8,
   },
@@ -507,7 +522,7 @@ const styles = StyleSheet.create({
 
   /* Rows */
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
@@ -516,7 +531,7 @@ const styles = StyleSheet.create({
   },
   rowDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: OUTLINE },
   rowLeading: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     flex: 1,
@@ -530,9 +545,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowLabelWrap: { flex: 1, minWidth: 0, gap: 2 },
-  rowLabel: { color: DARK, textAlign: 'right' },
-  rowSublabel: { color: MUTED, textAlign: 'right', fontSize: 12 },
-  rowTrailing: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  rowLabel: { color: DARK, textAlign: textAlignStart },
+  rowSublabel: { color: MUTED, textAlign: textAlignStart, fontSize: 12 },
+  rowTrailing: { flexDirection: rowDirection, alignItems: 'center', gap: 8 },
   rowPressed: { backgroundColor: 'rgba(0,0,0,0.025)' },
 
   walletBadge: {

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Heart, MapPin } from 'lucide-react-native';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -9,6 +10,8 @@ import { StarRating } from '@/components/ui/star-rating';
 import { Text } from '@/components/ui/text';
 import { useIsFavorite, useToggleFavorite } from '@/api/services/use-favorites';
 import type { Provider, Service } from '@/api/types';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -22,6 +25,7 @@ interface Props {
 }
 
 export function ServiceCard({ service, provider, featured = false, showFavorite = true }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const isFavorite = useIsFavorite(service.id);
   const toggle = useToggleFavorite();
@@ -78,7 +82,7 @@ export function ServiceCard({ service, provider, featured = false, showFavorite 
         {provider && (
           <View style={styles.providerRow}>
             {provider.verified && (
-              <Badge label="موثّق" variant="primary" style={styles.verifiedBadge} />
+              <Badge label={t('common.verified')} variant="primary" style={styles.verifiedBadge} />
             )}
             <Text variant="caption" style={styles.providerName}>{provider.name}</Text>
           </View>
@@ -88,10 +92,10 @@ export function ServiceCard({ service, provider, featured = false, showFavorite 
         <View style={styles.metaRow}>
           <View style={styles.distanceRow}>
             <MapPin size={12} color={MUTED} />
-            <Text variant="caption" style={styles.distanceText}>{service.distance} كم</Text>
+            <Text variant="caption" style={styles.distanceText}>{service.distance} {t('common.km')}</Text>
           </View>
           <Badge
-            label={`${service.priceFrom ? 'ابتداءً من ' : ''}${service.price.toLocaleString('ar-DZ')} د.ج`}
+            label={`${service.priceFrom ? `${t('common.starting_from')} ` : ''}${formatNumber(service.price)} ${t('common.dzd')}`}
             variant="primary"
           />
         </View>
@@ -150,13 +154,13 @@ const styles = StyleSheet.create({
   },
 
   content: { padding: 16, paddingTop: 24, gap: 6 },
-  title: { fontSize: 17, color: 'hsl(199, 41%, 12%)', textAlign: 'right' },
+  title: { fontSize: 17, color: 'hsl(199, 41%, 12%)', textAlign: textAlignStart },
 
-  providerRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
-  providerName: { color: MUTED, textAlign: 'right' },
+  providerRow: { flexDirection: rowDirection, alignItems: 'center', gap: 6 },
+  providerName: { color: MUTED, textAlign: textAlignStart },
   verifiedBadge: { transform: [{ scale: 0.85 }] },
 
-  metaRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  distanceRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+  metaRow: { flexDirection: rowDirection, justifyContent: 'space-between', alignItems: 'center' },
+  distanceRow: { flexDirection: rowDirection, alignItems: 'center', gap: 4 },
   distanceText: { color: MUTED },
 });

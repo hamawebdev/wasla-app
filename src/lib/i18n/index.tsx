@@ -24,9 +24,15 @@ i18n.use(initReactI18next).init({
   },
 });
 
+// Direction follows the resolved language: Arabic is RTL, English/French are LTR.
 export const isRTL: boolean = i18n.dir() === 'rtl';
 
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// Wasla drives layout direction manually from the selected language (see lib/rtl.ts)
+// rather than the native RTL engine. This keeps the experience deterministic across
+// iOS/Android/web and lets a language switch take effect with a plain JS reload.
+// Keep the native layout engine in LTR so it never double-flips our explicit
+// direction-aware styles.
+I18nManager.allowRTL(false);
+I18nManager.forceRTL(false);
 
 export default i18n;

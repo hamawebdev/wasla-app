@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { setRole } from '@/features/auth/use-auth-store';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 
@@ -32,7 +33,7 @@ export default function RoleSelectScreen() {
         {/* Logo / Header */}
         <View style={styles.header}>
           <Text variant="heading" weight="semibold" style={styles.appName}>
-            واصل
+            {t('common.app_name')}
           </Text>
           <Text variant="body" style={styles.subtitle}>
             {t('auth.role_title')}
@@ -110,11 +111,11 @@ const styles = StyleSheet.create({
     borderColor: PRIMARY,
   },
   roleRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 14,
   },
-  roleLabel: { flex: 1, fontSize: 17, textAlign: 'right', color: 'hsl(199, 25%, 25%)' },
+  roleLabel: { flex: 1, fontSize: 17, textAlign: textAlignStart, color: 'hsl(199, 25%, 25%)' },
   roleLabelSelected: { color: PRIMARY, fontWeight: '600' },
 
   radioCircle: {

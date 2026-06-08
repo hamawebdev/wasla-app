@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowRight, ChevronLeft, LayoutGrid, SlidersHorizontal } from 'lucide-react-native';
+import { LayoutGrid, SlidersHorizontal } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { BinocularsIllustration } from '@/components/illustrations';
 import { Button } from '@/components/ui/button';
+import { ArrowBack, ChevronForward } from '@/components/ui/directional-icon';
 import { Chip } from '@/components/ui/chip';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Screen } from '@/components/ui/screen';
@@ -20,12 +21,14 @@ import { MOCK_PROVIDERS } from '@/api/fixtures/providers';
 import { useSearchServices } from '@/api/services/use-services';
 import { CategorySheet } from '@/components/wasla/category-sheet';
 import { FilterSheet } from '@/components/wasla/filter-sheet';
+import { formatNumber } from '@/lib/format';
+import { rowDirection } from '@/lib/rtl';
 
 const SORT_OPTIONS = [
-  { key: 'distance', label: 'الأقرب' },
-  { key: 'rating', label: 'الأعلى تقييماً' },
-  { key: 'price_asc', label: 'السعر: الأقل' },
-  { key: 'price_desc', label: 'السعر: الأعلى' },
+  { key: 'distance', label: 'search.sort_nearest' },
+  { key: 'rating', label: 'search.sort_rating' },
+  { key: 'price_asc', label: 'search.sort_price_low' },
+  { key: 'price_desc', label: 'search.sort_price_high' },
 ];
 
 export default function SearchScreen() {
@@ -53,15 +56,15 @@ export default function SearchScreen() {
 
   const activeChips = [
     activeCategoryLabel && { key: 'category', label: activeCategoryLabel },
-    sortBy !== 'distance' && { key: 'sort', label: SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? '' },
-    filters.maxPrice && { key: 'price', label: `حتى ${filters.maxPrice?.toLocaleString('ar-DZ')} د.ج` },
-    filters.maxDistance && { key: 'dist', label: `ضمن ${filters.maxDistance} كم` },
-    filters.minRating && { key: 'rating', label: `${filters.minRating}+ نجوم` },
+    sortBy !== 'distance' && { key: 'sort', label: t(SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? 'search.sort') },
+    filters.maxPrice && { key: 'price', label: `${t('search.up_to')} ${formatNumber(filters.maxPrice)} ${t('common.dzd')}` },
+    filters.maxDistance && { key: 'dist', label: t('search.within_km', { km: filters.maxDistance }) },
+    filters.minRating && { key: 'rating', label: t('search.rating_stars', { rating: filters.minRating }) },
   ].filter(Boolean) as { key: string; label: string }[];
 
   const categoryChips = React.useMemo(
-    () => [{ id: 'all', label: 'الكل' }, ...CATEGORIES.map((c) => ({ id: c.id, label: c.label }))],
-    [],
+    () => [{ id: 'all', label: t('common.all') }, ...CATEGORIES.map((c) => ({ id: c.id, label: c.label }))],
+    [t],
   );
 
   return (
@@ -69,7 +72,7 @@ export default function SearchScreen() {
       {/* Header row */}
       <View style={styles.headerRow}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <ArrowRight size={22} color="hsl(199, 41%, 12%)" />
+          <ArrowBack size={22} color="hsl(199, 41%, 12%)" />
         </Pressable>
         <View style={styles.searchWrapper}>
           <SearchBar
@@ -148,7 +151,7 @@ export default function SearchScreen() {
           <Text variant="body" style={styles.categoryTriggerValue} numberOfLines={1}>
             {activeCategoryLabel ?? t('search.all_categories')}
           </Text>
-          <ChevronLeft size={18} color="hsl(198, 15%, 45%)" />
+          <ChevronForward size={18} color="hsl(198, 15%, 45%)" />
         </View>
       </Pressable>
 
@@ -162,7 +165,7 @@ export default function SearchScreen() {
           {SORT_OPTIONS.map((opt) => (
             <Chip
               key={opt.key}
-              label={opt.label}
+              label={t(opt.label)}
               selected={sortBy === opt.key}
               onPress={() => setSortBy(opt.key as SearchFilters['sortBy'])}
             />
@@ -211,7 +214,7 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, padding: 12 },
+  headerRow: { flexDirection: rowDirection, alignItems: 'center', gap: 8, padding: 12 },
   backBtn: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   searchWrapper: { flex: 1 },
 
@@ -228,20 +231,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'hsl(198, 21%, 88%)',
     backgroundColor: '#fff',
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
   },
-  categoryTriggerLeading: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  categoryTriggerLeading: { flexDirection: rowDirection, alignItems: 'center', gap: 8 },
   categoryTriggerLabel: { color: 'hsl(258, 52%, 54%)' },
-  categoryTriggerTrailing: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, flexShrink: 1 },
+  categoryTriggerTrailing: { flexDirection: rowDirection, alignItems: 'center', gap: 4, flexShrink: 1 },
   categoryTriggerValue: { color: 'hsl(199, 41%, 12%)', maxWidth: 160 },
 
-  sortRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingHorizontal: 12, paddingBottom: 8, gap: 8 },
-  filterBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, minHeight: 36 },
+  sortRow: { flexDirection: rowDirection, alignItems: 'center', paddingHorizontal: 12, paddingBottom: 8, gap: 8 },
+  filterBtn: { flexDirection: rowDirection, alignItems: 'center', gap: 4, minHeight: 36 },
   filterText: { color: 'hsl(258, 52%, 54%)' },
-  sortChips: { flex: 1, flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 6 },
+  sortChips: { flex: 1, flexDirection: rowDirection, flexWrap: 'wrap', gap: 6 },
 
   list: { padding: 16, paddingTop: 4 },
 });

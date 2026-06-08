@@ -15,6 +15,8 @@ import { CUSTOMER_NAMES, SERVICE_NAMES } from '@/api/fixtures/bookings';
 import { useBookingsStore } from '@/lib/stores/bookings';
 import type { Booking } from '@/api/types';
 import { EmptyCalendarIllustration } from '@/components/illustrations';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -31,10 +33,10 @@ const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'muted' | 'destruc
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'جديدة',
-  confirmed: 'الحالية',
-  completed: 'مكتملة',
-  cancelled: 'ملغية',
+  pending: 'provider.clients_new',
+  confirmed: 'provider.clients_current',
+  completed: 'provider.clients_completed',
+  cancelled: 'booking.status_cancelled',
 };
 
 export default function ClientsScreen() {
@@ -64,21 +66,21 @@ export default function ClientsScreen() {
       <View style={styles.card}>
         <View style={styles.cardTop}>
           <Avatar
-            name={CUSTOMER_NAMES[item.customerId] ?? 'عميلة'}
+            name={CUSTOMER_NAMES[item.customerId] ?? t('profile.role_customer')}
             size={44}
           />
           <View style={styles.cardInfo}>
             <Text variant="body" weight="semibold" style={styles.customerName}>
-              {CUSTOMER_NAMES[item.customerId] ?? 'عميلة'}
+              {CUSTOMER_NAMES[item.customerId] ?? t('profile.role_customer')}
             </Text>
             <Text variant="caption" style={styles.serviceTitle} numberOfLines={1}>
-              {SERVICE_NAMES[item.serviceId] ?? 'خدمة'}
+              {SERVICE_NAMES[item.serviceId] ?? t('common.service')}
             </Text>
-            <Text variant="caption" style={{ color: MUTED, textAlign: 'right' }}>
+            <Text variant="caption" style={{ color: MUTED, textAlign: textAlignStart }}>
               {item.date} — {item.time}
             </Text>
           </View>
-          <Badge label={STATUS_LABELS[status]} variant={STATUS_VARIANTS[status]} />
+          <Badge label={t(STATUS_LABELS[status])} variant={STATUS_VARIANTS[status]} />
         </View>
 
         {item.details && (
@@ -89,7 +91,7 @@ export default function ClientsScreen() {
 
         <View style={styles.priceRow}>
           <Text variant="label" weight="semibold" style={{ color: PRIMARY }}>
-            {item.price.toLocaleString('ar-DZ')} د.ج
+            {formatNumber(item.price)} {t('common.dzd')}
           </Text>
         </View>
 
@@ -117,7 +119,7 @@ export default function ClientsScreen() {
     <Screen edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Text variant="heading" weight="semibold" style={styles.title}>
-          طلبات العملاء
+          {t('provider.client_requests')}
         </Text>
         <SegmentedControl
           segments={[
@@ -133,8 +135,8 @@ export default function ClientsScreen() {
       {filtered.length === 0 ? (
         <EmptyState
           illustration={<EmptyCalendarIllustration size={100} />}
-          title="لا توجد طلبات"
-          body="ستظهر هنا طلبات عملائكِ الجديدة"
+          title={t('provider.no_requests_title')}
+          body={t('provider.no_requests_body')}
         />
       ) : (
         <FlatList
@@ -166,26 +168,26 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  cardTop: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: 12 },
+  cardTop: { flexDirection: rowDirection, alignItems: 'flex-start', gap: 12 },
   cardInfo: { flex: 1, gap: 3 },
-  customerName: { textAlign: 'right', color: DARK },
-  serviceTitle: { textAlign: 'right', color: MUTED },
+  customerName: { textAlign: textAlignStart, color: DARK },
+  serviceTitle: { textAlign: textAlignStart, color: MUTED },
   details: {
-    textAlign: 'right',
+    textAlign: textAlignStart,
     color: MUTED,
     paddingTop: 4,
     borderTopWidth: 1,
     borderTopColor: BORDER,
   },
   priceRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  actions: { flexDirection: 'row-reverse', gap: 10 },
+  actions: { flexDirection: rowDirection, gap: 10 },
   actionBtn: {
     flex: 1,
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { rowDirection } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED_BG = 'hsl(200, 20%, 94%)';
@@ -43,7 +44,7 @@ export function SegmentedControl({ segments, selected, onChange }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     backgroundColor: MUTED_BG,
     borderRadius: 10,
     padding: 3,

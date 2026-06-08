@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
-import { Camera, ChevronRight } from 'lucide-react-native';
+import { Camera } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Pressable,
@@ -12,10 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { Avatar } from '@/components/ui/avatar';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -24,6 +27,7 @@ const BG = 'hsl(180, 25%, 98%)';
 const BORDER = 'hsl(198, 21%, 88%)';
 
 export default function EditProfileScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore.use.profile();
   const updateProfile = useAuthStore.use.updateProfile();
@@ -34,7 +38,7 @@ export default function EditProfileScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('خطأ', 'الاسم الكامل مطلوب');
+      Alert.alert(t('common.error'), t('editProfile.name_required'));
       return;
     }
     setSaving(true);
@@ -50,10 +54,10 @@ export default function EditProfileScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          تعديل الملف الشخصي
+          {t('editProfile.title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -72,39 +76,39 @@ export default function EditProfileScreen() {
               size={90}
             />
             {/* TODO: Integrate real image picker (expo-image-picker) */}
-            <Pressable style={styles.cameraBadge} onPress={() => Alert.alert('قريباً', 'سيتوفر رفع الصورة في تحديث قادم')}>
+            <Pressable style={styles.cameraBadge} onPress={() => Alert.alert(t('common.coming_soon'), t('editProfile.photo_upload_soon'))}>
               <Camera size={16} color="#fff" />
             </Pressable>
           </View>
-          <Text variant="caption" style={styles.changePhotoLabel}>تغيير الصورة</Text>
+          <Text variant="caption" style={styles.changePhotoLabel}>{t('editProfile.change_photo')}</Text>
         </View>
 
         {/* Form */}
         <View style={styles.card}>
           <Input
-            label="الاسم الكامل"
+            label={t('editProfile.full_name')}
             value={name}
             onChangeText={setName}
-            placeholder="أدخلي اسمك الكامل"
+            placeholder={t('editProfile.full_name_placeholder')}
             returnKeyType="next"
           />
 
           {/* Phone — read-only with verified badge */}
           <View style={styles.phoneRow}>
-            <Text variant="caption" weight="medium" style={styles.phoneLabel}>رقم الهاتف</Text>
+            <Text variant="caption" weight="medium" style={styles.phoneLabel}>{t('editProfile.phone')}</Text>
             <View style={styles.phoneField}>
-              <Badge label="موثّق ✓" variant="success" />
+              <Badge label={t('editProfile.verified')} variant="success" />
               <Text variant="body" style={styles.phoneValue}>
                 {profile?.phone ?? '—'}
               </Text>
             </View>
             <Text variant="caption" style={styles.phoneNote}>
-              لتغيير رقم الهاتف تواصلي مع الدعم
+              {t('editProfile.phone_note')}
             </Text>
           </View>
 
           <Input
-            label="البريد الإلكتروني"
+            label={t('editProfile.email')}
             value={email}
             onChangeText={setEmail}
             placeholder="example@email.com"
@@ -117,7 +121,7 @@ export default function EditProfileScreen() {
       {/* Sticky save button */}
       <View style={styles.footer}>
         <Button
-          label="حفظ التغييرات"
+          label={t('editProfile.save')}
           variant="primary"
           size="lg"
           loading={saving}
@@ -133,7 +137,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
 
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -178,9 +182,9 @@ const styles = StyleSheet.create({
   },
 
   phoneRow: { gap: 6 },
-  phoneLabel: { color: MUTED, textAlign: 'right' },
+  phoneLabel: { color: MUTED, textAlign: textAlignStart },
   phoneField: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 10,
     paddingVertical: 10,
@@ -190,8 +194,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'hsl(200, 20%, 97%)',
   },
-  phoneValue: { color: MUTED, textAlign: 'right', flex: 1 },
-  phoneNote: { color: MUTED, textAlign: 'right', fontSize: 12 },
+  phoneValue: { color: MUTED, textAlign: textAlignStart, flex: 1 },
+  phoneNote: { color: MUTED, textAlign: textAlignStart, fontSize: 12 },
 
   footer: {
     padding: 16,

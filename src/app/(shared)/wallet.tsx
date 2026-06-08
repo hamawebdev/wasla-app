@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
-  ChevronRight,
   CreditCard,
   MoreVertical,
   Plus,
@@ -10,6 +9,7 @@ import {
   Wallet,
 } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Pressable,
   SectionList,
@@ -20,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import {
@@ -28,6 +29,8 @@ import {
   useWalletBalance,
 } from '@/api/services/use-wallet';
 import type { WalletTransaction, PaymentMethod } from '@/api/types';
+import { formatDate, formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -69,7 +72,7 @@ function transactionPrefix(type: WalletTransaction['type']): string {
 function groupTransactionsByDate(txs: WalletTransaction[]) {
   const groups: Record<string, WalletTransaction[]> = {};
   for (const tx of txs) {
-    const key = new Date(tx.date).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
+    const key = formatDate(tx.date, { year: 'numeric', month: 'long', day: 'numeric' });
     if (!groups[key]) groups[key] = [];
     groups[key].push(tx);
   }
@@ -77,6 +80,7 @@ function groupTransactionsByDate(txs: WalletTransaction[]) {
 }
 
 export default function WalletScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const role = useAuthStore.use.role();
   const { data: balance = 0 } = useWalletBalance();
@@ -90,10 +94,10 @@ export default function WalletScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          المحفظة
+          {t('wallet.title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -107,13 +111,13 @@ export default function WalletScreen() {
           <View style={styles.header}>
             {/* Balance card */}
             <View style={styles.balanceCard}>
-              <Text variant="caption" style={styles.balanceLabel}>الرصيد المتاح</Text>
+              <Text variant="caption" style={styles.balanceLabel}>{t('wallet.balance')}</Text>
               <Text style={styles.balanceAmount}>
-                {balance.toLocaleString('ar-DZ')} د.ج
+                {formatNumber(balance)} {t('common.dzd')}
               </Text>
               <View style={styles.actionRow}>
                 <Button
-                  label="شحن الرصيد"
+                  label={t('wallet.topup')}
                   variant="secondary"
                   size="md"
                   style={styles.actionBtn}
@@ -121,7 +125,7 @@ export default function WalletScreen() {
                 />
                 {role === 'provider' && (
                   <Button
-                    label="سحب الأرباح"
+                    label={t('wallet.withdraw')}
                     variant="outline"
                     size="md"
                     style={[styles.actionBtn, styles.withdrawBtn]}
@@ -134,7 +138,7 @@ export default function WalletScreen() {
             {/* Payment methods */}
             <View style={styles.sectionCard}>
               <Text variant="body" weight="semibold" style={styles.sectionTitle}>
-                طرق الدفع
+                {t('wallet.payment_methods')}
               </Text>
               {paymentMethods.map((pm) => (
                 <View key={pm.id} style={styles.pmRow}>
@@ -144,7 +148,7 @@ export default function WalletScreen() {
                   <View style={styles.pmBody}>
                     <Text variant="body" style={styles.pmLabel}>{pm.label}</Text>
                     {pm.last4 && (
-                      <Text variant="caption" style={{ color: MUTED, textAlign: 'right' }}>
+                      <Text variant="caption" style={{ color: MUTED, textAlign: textAlignStart }}>
                         ••••{pm.last4}
                       </Text>
                     )}
@@ -152,13 +156,13 @@ export default function WalletScreen() {
                   <View style={styles.pmIconWrapper}>
                     {paymentIcon(pm.kind)}
                   </View>
-                  {pm.isDefault && <Badge label="افتراضي" variant="success" />}
+                  {pm.isDefault && <Badge label={t('addresses.default')} variant="success" />}
                 </View>
               ))}
             </View>
 
             <Text variant="body" weight="semibold" style={styles.txTitle}>
-              سجل المعاملات
+              {t('wallet.transaction_history')}
             </Text>
           </View>
         }
@@ -173,12 +177,12 @@ export default function WalletScreen() {
               <Text
                 variant="body"
                 weight="semibold"
-                style={{ color: transactionColor(item.type), textAlign: 'right' }}
+                style={{ color: transactionColor(item.type), textAlign: textAlignStart }}
               >
-                {transactionPrefix(item.type)}{item.amount.toLocaleString('ar-DZ')} د.ج
+                {transactionPrefix(item.type)}{formatNumber(item.amount)} {t('common.dzd')}
               </Text>
               {item.status === 'pending' && (
-                <Badge label="قيد المعالجة" variant="warning" />
+                <Badge label={t('wallet.status_pending')} variant="warning" />
               )}
             </View>
             <View style={styles.txBody}>
@@ -200,7 +204,7 @@ export default function WalletScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
-  actionRow: { flexDirection: 'row-reverse', gap: 12, marginTop: 8 },
+  actionRow: { flexDirection: rowDirection, gap: 12, marginTop: 8 },
   actionBtn: { flex: 1 },
   withdrawBtn: { borderColor: '#fff' },
 
@@ -244,9 +248,9 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
-  sectionTitle: { color: FOREGROUND, textAlign: 'right' },
+  sectionTitle: { color: FOREGROUND, textAlign: textAlignStart },
   pmRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     paddingVertical: 8,
@@ -262,18 +266,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pmBody: { flex: 1, gap: 2 },
-  pmLabel: { color: FOREGROUND, textAlign: 'right' },
+  pmLabel: { color: FOREGROUND, textAlign: textAlignStart },
   pmMoreBtn: { padding: 4 },
 
-  txTitle: { color: FOREGROUND, textAlign: 'right' },
+  txTitle: { color: FOREGROUND, textAlign: textAlignStart },
   dateSectionHeader: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     backgroundColor: BG,
   },
-  dateSectionTitle: { color: MUTED, textAlign: 'right' },
+  dateSectionTitle: { color: MUTED, textAlign: textAlignStart },
   txRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
@@ -289,7 +293,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   txBody: { flex: 1 },
-  txDesc: { color: FOREGROUND, textAlign: 'right' },
+  txDesc: { color: FOREGROUND, textAlign: textAlignStart },
   txRight: { gap: 4, alignItems: 'flex-end' },
   separator: { height: 1, backgroundColor: BORDER },
 });

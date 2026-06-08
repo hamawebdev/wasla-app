@@ -11,6 +11,7 @@ import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
 import { HandshakeIllustration } from '@/components/illustrations';
 import { PROVIDER_NAMES } from '@/api/fixtures/bookings';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -38,7 +39,7 @@ export default function ReviewScreen() {
   const router = useRouter();
 
   const providerId = MOCK_BOOKING_PROVIDERS[bookingId ?? ''] ?? 'p1';
-  const providerName = PROVIDER_NAMES[providerId] ?? 'المزوّدة';
+  const providerName = PROVIDER_NAMES[providerId] ?? t('profile.role_provider');
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -46,7 +47,7 @@ export default function ReviewScreen() {
 
   const handleSubmit = () => {
     if (rating === 0) {
-      showMessage({ message: 'يرجى تحديد التقييم أولاً', type: 'warning' });
+      showMessage({ message: t('review.select_rating_first'), type: 'warning' });
       return;
     }
     showMessage({
@@ -96,7 +97,7 @@ export default function ReviewScreen() {
             placeholderTextColor={MUTED}
             multiline
             numberOfLines={4}
-            textAlign="right"
+            textAlign={textAlignStart}
             style={styles.textarea}
           />
         </View>
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   photosRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 10,
     width: '100%',
   },

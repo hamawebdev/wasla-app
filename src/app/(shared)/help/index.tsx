@@ -4,7 +4,6 @@ import {
   BookOpen,
   Calendar,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   CreditCard,
   HelpCircle,
@@ -14,6 +13,7 @@ import {
   User,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Linking,
   Pressable,
@@ -25,8 +25,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { Text } from '@/components/ui/text';
 import { useHelpArticles } from '@/api/services/use-help';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const PRIMARY = 'hsl(258, 52%, 54%)';
@@ -44,13 +46,14 @@ const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {
 };
 
 const CATEGORY_LABELS: Record<CategoryId, string> = {
-  bookings: 'الحجوزات',
-  payment: 'الدفع',
-  account: 'الحساب',
-  complaints: 'الشكاوى',
+  bookings: 'help.category_bookings',
+  payment: 'help.category_payment',
+  account: 'help.category_account',
+  complaints: 'help.category_complaints',
 };
 
 export default function HelpCenterScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [openArticleId, setOpenArticleId] = useState<string | null>(null);
@@ -74,10 +77,10 @@ export default function HelpCenterScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          مركز المساعدة
+          {t('help.title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -93,10 +96,10 @@ export default function HelpCenterScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="ابحثي في المساعدة..."
+            placeholder={t('help.search_placeholder')}
             placeholderTextColor={MUTED}
             style={styles.searchInput}
-            textAlign="right"
+            textAlign={textAlignStart}
           />
         </View>
 
@@ -104,7 +107,7 @@ export default function HelpCenterScreen() {
         {!search.trim() && (
           <View>
             <Text variant="body" weight="semibold" style={styles.sectionTitle}>
-              التصنيفات
+              {t('help.categories_title')}
             </Text>
             <View style={styles.categoryGrid}>
               {(Object.keys(CATEGORY_ICONS) as CategoryId[]).map((catId) => (
@@ -115,7 +118,7 @@ export default function HelpCenterScreen() {
                 >
                   {CATEGORY_ICONS[catId]}
                   <Text variant="label" weight="medium" style={styles.categoryLabel}>
-                    {CATEGORY_LABELS[catId]}
+                    {t(CATEGORY_LABELS[catId])}
                   </Text>
                 </Pressable>
               ))}
@@ -126,11 +129,11 @@ export default function HelpCenterScreen() {
         {/* Articles accordion */}
         <View>
           <Text variant="body" weight="semibold" style={styles.sectionTitle}>
-            {search.trim() ? 'نتائج البحث' : 'مقالات شائعة'}
+            {search.trim() ? t('help.search_results') : t('help.popular_title')}
           </Text>
           {displayArticles.length === 0 && (
             <Text variant="body" style={{ color: MUTED, textAlign: 'center', marginTop: 16 }}>
-              لم نجد نتائج مطابقة
+              {t('help.no_results')}
             </Text>
           )}
           {displayArticles.map((article) => {
@@ -156,7 +159,7 @@ export default function HelpCenterScreen() {
                       {article.body}
                     </Text>
                     <Pressable onPress={() => router.push(`/(shared)/help/${article.id}`)}>
-                      <Text variant="caption" style={styles.readMore}>قراءة المزيد ←</Text>
+                      <Text variant="caption" style={styles.readMore}>{t('help.read_more')}</Text>
                     </Pressable>
                   </View>
                 )}
@@ -170,18 +173,18 @@ export default function HelpCenterScreen() {
       <View style={styles.footer}>
         <View style={styles.footerCard}>
           <Text variant="body" weight="semibold" style={{ textAlign: 'center', color: FOREGROUND }}>
-            لم تجدي ما تبحثين عنه؟
+            {t('help.not_found_title')}
           </Text>
           <View style={styles.footerBtns}>
             <Button
-              label="محادثة مباشرة"
+              label={t('help.live_chat')}
               variant="primary"
               size="md"
               style={styles.footerBtn}
               onPress={() => {}}
             />
             <Button
-              label="اتصال"
+              label={t('help.call')}
               variant="outline"
               size="md"
               style={styles.footerBtn}
@@ -198,7 +201,7 @@ export default function HelpCenterScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -213,7 +216,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 20, paddingBottom: 120 },
 
   searchContainer: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 10,
     backgroundColor: '#fff',
@@ -230,10 +233,10 @@ const styles = StyleSheet.create({
     color: FOREGROUND,
   },
 
-  sectionTitle: { color: FOREGROUND, textAlign: 'right', marginBottom: 12 },
+  sectionTitle: { color: FOREGROUND, textAlign: textAlignStart, marginBottom: 12 },
 
   categoryGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     flexWrap: 'wrap',
     gap: 12,
   },
@@ -263,12 +266,12 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   accordionHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 10,
     padding: 16,
   },
-  accordionTitle: { flex: 1, color: FOREGROUND, textAlign: 'right' },
+  accordionTitle: { flex: 1, color: FOREGROUND, textAlign: textAlignStart },
   accordionBody: {
     padding: 16,
     paddingTop: 0,
@@ -276,8 +279,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: BORDER,
   },
-  accordionBodyText: { color: MUTED, textAlign: 'right', lineHeight: 24 },
-  readMore: { color: PRIMARY, textAlign: 'right', fontWeight: '500' },
+  accordionBodyText: { color: MUTED, textAlign: textAlignStart, lineHeight: 24 },
+  readMore: { color: PRIMARY, textAlign: textAlignStart, fontWeight: '500' },
 
   footer: {
     position: 'absolute',
@@ -301,6 +304,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
-  footerBtns: { flexDirection: 'row-reverse', gap: 12 },
+  footerBtns: { flexDirection: rowDirection, gap: 12 },
   footerBtn: { flex: 1 },
 });

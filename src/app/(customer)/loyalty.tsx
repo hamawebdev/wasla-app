@@ -19,6 +19,8 @@ import {
   MOCK_USER_POINTS,
 } from '@/api/fixtures/loyalty';
 import type { Badge as BadgeType, PointsTransaction, Reward } from '@/api/types';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -106,16 +108,16 @@ export default function LoyaltyScreen() {
             return (
               <Card key={reward.id} style={styles.rewardCard}>
                 <View style={styles.rewardInfo}>
-                  <Text variant="body" weight="semibold" style={{ textAlign: 'right', color: DARK }}>
+                  <Text variant="body" weight="semibold" style={{ textAlign: textAlignStart, color: DARK }}>
                     {reward.title}
                   </Text>
-                  <Text variant="caption" style={{ textAlign: 'right', color: MUTED }}>
+                  <Text variant="caption" style={{ textAlign: textAlignStart, color: MUTED }}>
                     {reward.description}
                   </Text>
                 </View>
                 <View style={styles.rewardAction}>
                   <Text variant="label" weight="semibold" style={{ color: canAfford ? PRIMARY : MUTED }}>
-                    {reward.pointsCost} نقطة
+                    {formatNumber(reward.pointsCost)} {t('loyalty.points_unit')}
                   </Text>
                   <Pressable
                     style={[styles.redeemBtn, !canAfford && styles.redeemBtnDisabled]}
@@ -166,7 +168,7 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 12,
   },
-  tierInfo: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+  tierInfo: { flexDirection: rowDirection, alignItems: 'center', justifyContent: 'space-between' },
   pointsValue: { color: '#fff', fontSize: 28 },
   progressTrack: {
     height: 8,
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
   tabsWrap: { paddingHorizontal: 16, marginBottom: 16 },
 
   badgesGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     flexWrap: 'wrap',
     paddingHorizontal: 12,
     gap: 10,
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
   lockedLabel: { color: MUTED, fontSize: 10 },
 
   rewardsList: { paddingHorizontal: 16, gap: 10, paddingBottom: 20 },
-  rewardCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
+  rewardCard: { flexDirection: rowDirection, alignItems: 'center', gap: 12 },
   rewardInfo: { flex: 1, gap: 4 },
   rewardAction: { alignItems: 'center', gap: 8 },
   redeemBtn: {
@@ -217,7 +219,7 @@ const styles = StyleSheet.create({
 
   historyList: { paddingHorizontal: 16, gap: 2, paddingBottom: 20 },
   txRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -225,5 +227,5 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   txLeft: { alignItems: 'center', gap: 2, minWidth: 44 },
-  txDesc: { flex: 1, textAlign: 'right', color: DARK },
+  txDesc: { flex: 1, textAlign: textAlignStart, color: DARK },
 });

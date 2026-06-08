@@ -10,10 +10,12 @@ import {
   User,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProviderActionSheet } from '@/components/wasla/provider-action-sheet';
 import { Text } from './text';
+import { rowDirection } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -28,22 +30,23 @@ interface TabConfig {
 }
 
 const CUSTOMER_TABS: TabConfig[] = [
-  { name: 'index', label: 'الرئيسية', href: '/(customer)/', Icon: Home },
-  { name: 'search', label: 'البحث', href: '/(customer)/search', Icon: Search },
-  { name: 'bookings', label: 'حجوزاتي', href: '/(customer)/bookings', Icon: CalendarDays },
-  { name: 'chat', label: 'المحادثات', href: '/(customer)/chat', Icon: MessageCircle },
-  { name: 'profile', label: 'حسابي', href: '/(customer)/profile', Icon: User },
+  { name: 'index', label: 'tabs.home', href: '/(customer)/', Icon: Home },
+  { name: 'search', label: 'tabs.search', href: '/(customer)/search', Icon: Search },
+  { name: 'bookings', label: 'tabs.bookings', href: '/(customer)/bookings', Icon: CalendarDays },
+  { name: 'chat', label: 'tabs.chat', href: '/(customer)/chat', Icon: MessageCircle },
+  { name: 'profile', label: 'tabs.account', href: '/(customer)/profile', Icon: User },
 ];
 
 const PROVIDER_TABS: TabConfig[] = [
-  { name: 'index', label: 'لوحتي', href: '/(provider)/', Icon: Home },
-  { name: 'services', label: 'خدماتي', href: '/(provider)/services', Icon: Package },
-  { name: 'add', label: 'إضافة', href: '', Icon: Plus, isAction: true },
-  { name: 'chat', label: 'المحادثات', href: '/(provider)/chat', Icon: MessageCircle },
-  { name: 'profile', label: 'حسابي', href: '/(provider)/profile', Icon: User },
+  { name: 'index', label: 'tabs.dashboard', href: '/(provider)/', Icon: Home },
+  { name: 'services', label: 'tabs.services', href: '/(provider)/services', Icon: Package },
+  { name: 'add', label: 'tabs.add', href: '', Icon: Plus, isAction: true },
+  { name: 'chat', label: 'tabs.chat', href: '/(provider)/chat', Icon: MessageCircle },
+  { name: 'profile', label: 'tabs.account', href: '/(provider)/profile', Icon: User },
 ];
 
 export function WaslaTabBar({ state, navigation }: BottomTabBarProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const segments = useSegments() as string[];
@@ -68,13 +71,13 @@ export function WaslaTabBar({ state, navigation }: BottomTabBarProps) {
                 onPress={() => setSheetVisible(true)}
                 style={styles.actionTab}
                 accessibilityRole="button"
-                accessibilityLabel="إضافة"
+                accessibilityLabel={t(tab.label)}
               >
                 <View style={styles.actionCircle}>
                   <Plus size={28} color="#fff" strokeWidth={2.5} />
                 </View>
                 <Text variant="caption" style={[styles.tabLabel, { color: MUTED }]}>
-                  {tab.label}
+                  {t(tab.label)}
                 </Text>
               </Pressable>
             );
@@ -109,7 +112,7 @@ export function WaslaTabBar({ state, navigation }: BottomTabBarProps) {
               onPress={onPress}
               style={styles.tab}
               accessibilityRole="button"
-              accessibilityLabel={label}
+              accessibilityLabel={t(label)}
               accessibilityState={isFocused ? { selected: true } : {}}
             >
               <Icon
@@ -122,7 +125,7 @@ export function WaslaTabBar({ state, navigation }: BottomTabBarProps) {
                 variant="caption"
                 style={[styles.tabLabel, { color: isFocused ? PRIMARY : MUTED }]}
               >
-                {label}
+                {t(label)}
               </Text>
             </Pressable>
           );
@@ -141,7 +144,7 @@ export function WaslaTabBar({ state, navigation }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     backgroundColor: TAB_BG,
     borderTopWidth: 1,
     borderTopColor: 'hsl(198, 21%, 88%)',

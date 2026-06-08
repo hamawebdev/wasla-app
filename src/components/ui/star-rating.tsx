@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './text';
+import { rowDirection } from '@/lib/rtl';
 
 interface Props {
   value: number;
@@ -55,7 +56,7 @@ export function StarRating({
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 2,
   },

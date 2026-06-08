@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { TextInputProps } from 'react-native';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 interface Props extends TextInputProps {
   label?: string;
@@ -26,7 +27,7 @@ export function Input({ label, error, prefix, suffix, style, ...props }: Props) 
         <TextInput
           style={[styles.input, style]}
           placeholderTextColor="hsl(198, 15%, 45%)"
-          textAlign="right"
+          textAlign={textAlignStart}
           textAlignVertical="center"
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -46,10 +47,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'hsl(199, 41%, 12%)',
     marginBottom: 6,
-    textAlign: 'right',
+    textAlign: textAlignStart,
   },
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     backgroundColor: '#ffffff',
     borderRadius: 12,
@@ -81,6 +82,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'hsl(0, 84%, 60%)',
     marginTop: 4,
-    textAlign: 'right',
+    textAlign: textAlignStart,
   },
 });

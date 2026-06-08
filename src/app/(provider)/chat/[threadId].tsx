@@ -19,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { Text } from '@/components/ui/text';
 import { useBookingsStore } from '@/lib/stores/bookings';
 import type { Message } from '@/api/types';
+import { formatTime } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -35,10 +37,10 @@ const CUSTOMER_REPLIES = [
 ];
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'قيد الانتظار',
-  confirmed: 'مؤكد',
-  completed: 'مكتمل',
-  cancelled: 'ملغي',
+  pending: 'booking.status_pending',
+  confirmed: 'booking.status_confirmed',
+  completed: 'booking.status_completed',
+  cancelled: 'booking.status_cancelled',
 };
 
 const STATUS_VARIANTS: Record<string, 'warning' | 'success' | 'muted' | 'destructive'> = {
@@ -80,7 +82,7 @@ export default function ProviderChatRoomScreen() {
       threadId: threadId ?? '',
       senderId: 'provider',
       text,
-      timestamp: new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }),
+      timestamp: formatTime(new Date()),
       isCustomer: false,
     };
     setMessages((prev) => [...prev, newMsg]);
@@ -94,7 +96,7 @@ export default function ProviderChatRoomScreen() {
         threadId: threadId ?? '',
         senderId: 'customer',
         text: replyText,
-        timestamp: new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: formatTime(new Date()),
         isCustomer: true,
       };
       setMessages((prev) => [...prev, reply]);
@@ -132,7 +134,7 @@ export default function ProviderChatRoomScreen() {
         </Pressable>
         <View style={styles.headerCenter}>
           <Text variant="label" weight="semibold" style={styles.headerName} numberOfLines={1}>
-            عميلة — {thread.providerName}
+            {t('profile.role_customer')} — {thread.providerName}
           </Text>
           <Text variant="caption" style={[styles.headerStatus, thread.providerOnline && styles.statusOnline]}>
             {thread.providerOnline ? t('chat.online') : t('chat.offline')}
@@ -153,7 +155,7 @@ export default function ProviderChatRoomScreen() {
         {thread.bookingId && (
           <View style={styles.bookingCard}>
             <Badge
-              label={STATUS_LABELS[thread.bookingStatus ?? 'pending']}
+              label={t(STATUS_LABELS[thread.bookingStatus ?? 'pending'])}
               variant={STATUS_VARIANTS[thread.bookingStatus ?? 'pending']}
             />
             <Text variant="caption" style={styles.bookingLabel}>{t('chat.linked_booking')}</Text>
@@ -204,7 +206,7 @@ export default function ProviderChatRoomScreen() {
             placeholderTextColor={MUTED}
             multiline
             maxLength={500}
-            textAlign="right"
+            textAlign={textAlignStart}
           />
           <View style={styles.inputIcons}>
             <Pressable hitSlop={8}><Mic size={20} color={MUTED} /></Pressable>
@@ -223,7 +225,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: 'hsl(180, 25%, 98%)' },
   flex: { flex: 1 },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -243,31 +245,31 @@ const styles = StyleSheet.create({
     borderBottomColor: BORDER,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 10,
   },
-  bookingLabel: { color: MUTED, flex: 1, textAlign: 'right' },
+  bookingLabel: { color: MUTED, flex: 1, textAlign: textAlignStart },
   safetyBanner: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: ACCENT_BG,
   },
-  safetyText: { flex: 1, color: ACCENT_FG, textAlign: 'right', fontSize: 12 },
+  safetyText: { flex: 1, color: ACCENT_FG, textAlign: textAlignStart, fontSize: 12 },
   msgList: { padding: 16, paddingBottom: 8 },
   msgWrapper: { marginBottom: 8 },
   timeLabel: { textAlign: 'center', color: MUTED, marginBottom: 6, fontSize: 11 },
   bubble: { maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
   bubbleOwn: { alignSelf: 'flex-start', backgroundColor: PRIMARY, borderBottomStartRadius: 4 },
   bubbleOther: { alignSelf: 'flex-end', backgroundColor: '#fff', borderWidth: 1, borderColor: BORDER, borderBottomEndRadius: 4 },
-  bubbleText: { textAlign: 'right', lineHeight: 22 },
+  bubbleText: { textAlign: textAlignStart, lineHeight: 22 },
   bubbleTextOwn: { color: '#fff' },
   bubbleTextOther: { color: DARK },
   actionsPanel: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: BORDER,
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
   },
   actionBtn: { flex: 1, alignItems: 'center', gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: 'hsl(258,45%,97%)' },
   inputBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-end',
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -299,6 +301,6 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     textAlignVertical: 'center',
   },
-  inputIcons: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, paddingHorizontal: 4, paddingBottom: 6 },
+  inputIcons: { flexDirection: rowDirection, alignItems: 'center', gap: 12, paddingHorizontal: 4, paddingBottom: 6 },
   plusIcon: { fontSize: 24, color: MUTED, fontFamily: 'Rubik', lineHeight: 28 },
 });

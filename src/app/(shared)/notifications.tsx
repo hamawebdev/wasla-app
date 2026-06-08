@@ -1,15 +1,16 @@
 import { useRouter } from 'expo-router';
+import type { TFunction } from 'i18next';
 import {
   Bell,
   BellRing,
   Calendar,
-  ChevronRight,
   Info,
   MessageCircle,
   Tag,
   Trash2,
 } from 'lucide-react-native';
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Animated,
   Pressable,
@@ -20,10 +21,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Swipeable } from 'react-native-gesture-handler';
 
+import { ChevronBack } from '@/components/ui/directional-icon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Text } from '@/components/ui/text';
 import { useDeleteNotification, useMarkAllRead, useNotifications } from '@/api/services/use-notifications';
 import type { Notification } from '@/api/types';
+import { formatDate } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -51,6 +55,7 @@ function typeBg(type: Notification['type']): string {
 }
 
 function NotificationRow({ item }: { item: Notification }) {
+  const { t } = useTranslation();
   const deleteNotif = useDeleteNotification();
   const swipeRef = useRef<Swipeable>(null);
 
@@ -82,23 +87,23 @@ function NotificationRow({ item }: { item: Notification }) {
           </Text>
         </View>
         <Text variant="caption" style={styles.timestamp}>
-          {formatTime(item.timestamp)}
+          {formatTime(t, item.timestamp)}
         </Text>
       </View>
     </Swipeable>
   );
 }
 
-function formatTime(iso: string): string {
+function formatTime(t: TFunction, iso: string): string {
   const d = new Date(iso);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffH = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffH < 1) return 'الآن';
-  if (diffH < 24) return `منذ ${diffH}س`;
+  if (diffH < 1) return t('notifications.time_now');
+  if (diffH < 24) return t('notifications.time_hours', { count: diffH });
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 7) return `منذ ${diffD}ي`;
-  return d.toLocaleDateString('ar-DZ');
+  if (diffD < 7) return t('notifications.time_days', { count: diffD });
+  return formatDate(iso);
 }
 
 function groupByDate(notifications: Notification[]) {
@@ -107,26 +112,27 @@ function groupByDate(notifications: Notification[]) {
   yesterday.setDate(yesterday.getDate() - 1);
 
   const groups: Record<string, Notification[]> = {
-    اليوم: [],
-    أمس: [],
-    'هذا الأسبوع': [],
+    'notifications.today': [],
+    'notifications.yesterday': [],
+    'notifications.this_week': [],
   };
 
   for (const n of notifications) {
     const d = new Date(n.timestamp);
     const diffMs = today.getTime() - d.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) groups['اليوم'].push(n);
-    else if (diffDays === 1) groups['أمس'].push(n);
-    else groups['هذا الأسبوع'].push(n);
+    if (diffDays === 0) groups['notifications.today'].push(n);
+    else if (diffDays === 1) groups['notifications.yesterday'].push(n);
+    else groups['notifications.this_week'].push(n);
   }
 
   return Object.entries(groups)
     .filter(([, items]) => items.length > 0)
-    .map(([title, data]) => ({ title, data }));
+    .map(([titleKey, data]) => ({ titleKey, data }));
 }
 
 export default function NotificationsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: notifications = [], isLoading } = useNotifications();
   const markAllRead = useMarkAllRead();
@@ -139,15 +145,15 @@ export default function NotificationsScreen() {
       {/* Top App Bar */}
       <View style={styles.appBar}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <ChevronRight size={24} color={FOREGROUND} />
+          <ChevronBack size={24} color={FOREGROUND} />
         </Pressable>
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          الإشعارات
+          {t('notifications.title')}
         </Text>
         {hasUnread ? (
           <Pressable onPress={() => markAllRead.mutate()} hitSlop={8}>
             <Text variant="caption" weight="medium" style={styles.markRead}>
-              تحديد الكل كمقروء
+              {t('notifications.mark_all_read')}
             </Text>
           </Pressable>
         ) : (
@@ -158,8 +164,8 @@ export default function NotificationsScreen() {
       {notifications.length === 0 && !isLoading ? (
         <EmptyState
           illustration={<Bell size={64} color="hsl(198, 21%, 88%)" />}
-          title="لا توجد إشعارات"
-          body="ستصلك إشعارات حجوزاتك ورسائلك هنا"
+          title={t('notifications.empty_title')}
+          body={t('notifications.empty_body')}
         />
       ) : (
         <SectionList
@@ -167,10 +173,10 @@ export default function NotificationsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
-          renderSectionHeader={({ section: { title } }) => (
+          renderSectionHeader={({ section: { titleKey } }) => (
             <View style={styles.sectionHeader}>
               <Text variant="caption" weight="medium" style={styles.sectionTitle}>
-                {title}
+                {t(titleKey)}
               </Text>
             </View>
           )}
@@ -185,7 +191,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -203,9 +209,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: BG,
   },
-  sectionTitle: { color: MUTED, textAlign: 'right' },
+  sectionTitle: { color: MUTED, textAlign: textAlignStart },
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-start',
     gap: 12,
     paddingHorizontal: 16,
@@ -233,8 +239,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowBody: { flex: 1, gap: 4 },
-  rowTitle: { color: FOREGROUND, textAlign: 'right' },
-  rowDesc: { color: MUTED, textAlign: 'right' },
+  rowTitle: { color: FOREGROUND, textAlign: textAlignStart },
+  rowDesc: { color: MUTED, textAlign: textAlignStart },
   timestamp: { color: MUTED, flexShrink: 0, marginTop: 2 },
   separator: { height: 1, backgroundColor: BORDER },
   deleteAction: {

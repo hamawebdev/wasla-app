@@ -1,8 +1,10 @@
 import { Check } from 'lucide-react-native';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
+import { rowDirection } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const PRIMARY_TINT = 'hsl(258, 45%, 96%)';
@@ -17,12 +19,13 @@ interface Props {
 }
 
 const STEPS: { id: Step; label: string }[] = [
-  { id: 1, label: 'التاريخ' },
-  { id: 2, label: 'التفاصيل' },
-  { id: 3, label: 'التأكيد' },
+  { id: 1, label: 'booking.step_date' },
+  { id: 2, label: 'booking.step_details' },
+  { id: 3, label: 'booking.step_confirm' },
 ];
 
 export function BookingStepper({ currentStep }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <View style={styles.track} />
@@ -56,7 +59,7 @@ export function BookingStepper({ currentStep }: Props) {
               weight="medium"
               style={[styles.label, (isCompleted || isActive) && styles.labelActive]}
             >
-              {step.label}
+              {t(step.label)}
             </Text>
           </View>
         );
@@ -67,7 +70,7 @@ export function BookingStepper({ currentStep }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     position: 'relative',

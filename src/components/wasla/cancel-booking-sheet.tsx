@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { rowDirection, textAlignStart, writingDir } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -136,7 +137,7 @@ export function CancelBookingSheet({ isOpen, onClose, onConfirm }: Props) {
               value={notes}
               onChangeText={setNotes}
               multiline
-              textAlign="right"
+              textAlign={textAlignStart}
               textAlignVertical="top"
             />
           </View>
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   section: { gap: 8 },
 
   radioRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
@@ -207,9 +208,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: PRIMARY,
   },
-  radioLabel: { color: DARK, flex: 1, textAlign: 'right' },
+  radioLabel: { color: DARK, flex: 1, textAlign: textAlignStart },
 
-  notesLabel: { textAlign: 'right', color: DARK },
+  notesLabel: { textAlign: textAlignStart, color: DARK },
   notesInput: {
     fontFamily: 'Rubik',
     fontSize: 15,
@@ -221,11 +222,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: '#fff',
-    writingDirection: 'rtl',
+    writingDirection: writingDir,
   },
 
   footer: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 10,
     paddingHorizontal: 20,
     paddingTop: 12,

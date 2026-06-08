@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Heart, HeartOff } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   Image,
@@ -17,6 +18,8 @@ import { StarRating } from '@/components/ui/star-rating';
 import { Text } from '@/components/ui/text';
 import { useFavorites, useToggleFavorite } from '@/api/services/use-favorites';
 import { MOCK_SERVICES } from '@/api/fixtures/services';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const FOREGROUND = 'hsl(199, 41%, 12%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -33,6 +36,7 @@ function FavoriteCard({
   onPress: () => void;
   onUnfavorite: () => void;
 }) {
+  const { t } = useTranslation();
   const service = MOCK_SERVICES.find((s) => s.id === serviceId);
   if (!service) return null;
 
@@ -57,7 +61,7 @@ function FavoriteCard({
         </Text>
         <StarRating value={service.rating} size={12} />
         <Badge
-          label={`${service.priceFrom ? 'ابتداءً من ' : ''}${service.price.toLocaleString('ar-DZ')} د.ج`}
+          label={`${service.priceFrom ? `${t('common.starting_from')} ` : ''}${formatNumber(service.price)} ${t('common.dzd')}`}
           variant="primary"
         />
       </View>
@@ -66,6 +70,7 @@ function FavoriteCard({
 }
 
 export default function FavoritesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const favoriteIds = useFavorites();
   const toggle = useToggleFavorite();
@@ -75,7 +80,7 @@ export default function FavoritesScreen() {
       <View style={styles.appBar}>
         <View style={{ width: 40 }} />
         <Text variant="heading" weight="semibold" style={styles.appBarTitle}>
-          المفضلة
+          {t('favorites.title')}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -83,10 +88,10 @@ export default function FavoritesScreen() {
       {favoriteIds.length === 0 ? (
         <EmptyState
           illustration={<HeartOff size={64} color="hsl(198, 21%, 88%)" />}
-          title="لم تحفظي أي خدمة بعد"
-          body="اضغطي على أيقونة القلب في أي خدمة لحفظها هنا"
+          title={t('favorites.empty_title')}
+          body={t('favorites.empty_body')}
           cta={{
-            label: 'استكشفي الخدمات',
+            label: t('booking.explore'),
             onPress: () => router.push('/(customer)/'),
             variant: 'secondary',
           }}
@@ -115,7 +120,7 @@ export default function FavoritesScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
@@ -126,7 +131,7 @@ const styles = StyleSheet.create({
   },
   appBarTitle: { color: FOREGROUND, fontSize: 18 },
   list: { padding: 12, gap: 12 },
-  row: { gap: 12, flexDirection: 'row-reverse' },
+  row: { gap: 12, flexDirection: rowDirection },
   card: {
     flex: 1,
     backgroundColor: '#fff',
@@ -156,5 +161,5 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardBody: { padding: 10, gap: 6 },
-  title: { color: FOREGROUND, textAlign: 'right' },
+  title: { color: FOREGROUND, textAlign: textAlignStart },
 });

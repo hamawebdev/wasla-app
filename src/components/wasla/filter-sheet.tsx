@@ -14,6 +14,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import type { SearchFilters } from '@/api/types';
+import { formatNumber } from '@/lib/format';
+import { rowDirection, textAlignStart } from '@/lib/rtl';
 
 const PRIMARY = 'hsl(258, 52%, 54%)';
 const MUTED = 'hsl(198, 15%, 45%)';
@@ -106,11 +108,11 @@ export function FilterSheet({ isOpen, onClose, filters, onApply }: Props) {
             {t('search.price_range')}
           </Text>
           <View style={styles.row}>
-            <Text variant="caption" style={{ color: MUTED }}>500 د.ج</Text>
+            <Text variant="caption" style={{ color: MUTED }}>{`${formatNumber(500)} ${t('common.dzd')}`}</Text>
             <Text variant="body" weight="semibold" style={{ color: PRIMARY }}>
-              {maxPrice === 50000 ? 'الكل' : `${maxPrice.toLocaleString('ar-DZ')} د.ج`}
+              {maxPrice === 50000 ? t('common.all') : `${formatNumber(maxPrice)} ${t('common.dzd')}`}
             </Text>
-            <Text variant="caption" style={{ color: MUTED }}>50,000 د.ج</Text>
+            <Text variant="caption" style={{ color: MUTED }}>{`${formatNumber(50000)} ${t('common.dzd')}`}</Text>
           </View>
           <View style={styles.fakePriceSlider}>
             {[5000, 10000, 20000, 30000, 50000].map((v) => (
@@ -166,7 +168,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApply }: Props) {
             >
               <View style={[styles.radio, minRating === r && styles.radioActive]} />
               <Text variant="body" style={{ color: 'hsl(199, 41%, 12%)' }}>
-                {r === 0 ? 'الكل' : `${r}+ نجوم`}
+                {r === 0 ? t('common.all') : t('search.rating_stars', { rating: r })}
               </Text>
             </Pressable>
           ))}
@@ -191,20 +193,20 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, gap: 16 },
   title: { textAlign: 'center', fontSize: 18, paddingTop: 12, paddingHorizontal: 20 },
   section: { gap: 10 },
-  sectionLabel: { textAlign: 'right', color: 'hsl(199, 41%, 12%)' },
+  sectionLabel: { textAlign: textAlignStart, color: 'hsl(199, 41%, 12%)' },
 
-  row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
+  row: { flexDirection: rowDirection, justifyContent: 'space-between', alignItems: 'center' },
   sliderVal: { textAlign: 'center' },
 
-  fakePriceSlider: { flexDirection: 'row-reverse', gap: 8, justifyContent: 'center' },
+  fakePriceSlider: { flexDirection: rowDirection, gap: 8, justifyContent: 'center' },
   pricePip: { width: 32, height: 8, borderRadius: 4, backgroundColor: 'hsl(200, 20%, 88%)' },
   pricePipActive: { backgroundColor: 'hsl(258, 52%, 54%)' },
 
-  fakeSlider: { flexDirection: 'row-reverse', gap: 10, justifyContent: 'center' },
+  fakeSlider: { flexDirection: rowDirection, gap: 10, justifyContent: 'center' },
   pip: { width: 44, height: 8, borderRadius: 4, backgroundColor: 'hsl(200, 20%, 88%)' },
   pipActive: { backgroundColor: 'hsl(258, 52%, 54%)' },
 
-  radioRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, minHeight: 40 },
+  radioRow: { flexDirection: rowDirection, alignItems: 'center', gap: 12, minHeight: 40 },
   radio: {
     width: 20,
     height: 20,
@@ -215,7 +217,7 @@ const styles = StyleSheet.create({
   radioActive: { borderColor: 'hsl(258, 52%, 54%)', backgroundColor: 'hsl(258, 52%, 54%)' },
 
   footer: {
-    flexDirection: 'row-reverse',
+    flexDirection: rowDirection,
     gap: 10,
     paddingHorizontal: 20,
     paddingTop: 12,
