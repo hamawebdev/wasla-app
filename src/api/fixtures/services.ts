@@ -8,7 +8,7 @@ export const MOCK_SERVICES: Service[] = [
     categoryId: 'sewing',
     providerId: 'p1',
     images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=450&fit=crop',
+      'https://images.unsplash.com/photo-1457972657980-4c9fddebec8d?w=800&h=450&fit=crop',
       'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&h=450&fit=crop',
       'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=450&fit=crop',
     ],
@@ -31,7 +31,7 @@ export const MOCK_SERVICES: Service[] = [
     categoryId: 'sweets',
     providerId: 'p2',
     images: [
-      'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=450&fit=crop',
+      'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=450&fit=crop',
       'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=800&h=450&fit=crop',
     ],
     price: 3500,
@@ -76,7 +76,7 @@ export const MOCK_SERVICES: Service[] = [
     providerId: 'p4',
     images: [
       'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=450&fit=crop',
-      'https://images.unsplash.com/photo-1478146059778-b2601b32b4e4?w=800&h=450&fit=crop',
+      'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=450&fit=crop',
     ],
     price: 50000,
     priceFrom: true,
@@ -226,7 +226,7 @@ export const MOCK_SERVICES: Service[] = [
     categoryId: 'sewing',
     providerId: 'p1',
     images: [
-      'https://images.unsplash.com/photo-1610030181247-59c6dbd367b1?w=800&h=450&fit=crop',
+      'https://images.unsplash.com/photo-1578353022142-09264fd64295?w=800&h=450&fit=crop',
       'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&h=450&fit=crop',
     ],
     price: 5000,
@@ -248,7 +248,8 @@ export const MOCK_SERVICES: Service[] = [
     categoryId: 'beauty',
     providerId: 'p3',
     images: [
-      'https://images.unsplash.com/photo-1540555700478-4be289fbec6b?w=800&h=450&fit=crop',
+      'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=450&fit=crop',
+      'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&h=450&fit=crop',
     ],
     price: 4500,
     priceFrom: false,

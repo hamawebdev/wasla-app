@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { StarRating } from '@/components/ui/star-rating';
 import { Text } from '@/components/ui/text';
+import { MOCK_THREADS } from '@/api/fixtures/chats';
 import { useProviderById, useServices, useServiceReviews } from '@/api/services/use-services';
 import { formatNumber } from '@/lib/format';
 import { rowDirection, textAlignStart } from '@/lib/rtl';
@@ -66,6 +67,11 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
   }
 
   const firstService = providerServices[0];
+
+  const handleContact = () => {
+    const thread = MOCK_THREADS.find((th) => th.providerId === providerId);
+    router.push(`/(customer)/chat/${thread?.id ?? 't1'}`);
+  };
 
   return (
     <View style={styles.container}>
@@ -258,7 +264,7 @@ export function ProviderPublicProfile({ providerId, mode = 'public' }: Props) {
             variant="outline"
             size="md"
             style={styles.ctaBtn}
-            onPress={() => {}}
+            onPress={handleContact}
           />
           {firstService && (
             <Button

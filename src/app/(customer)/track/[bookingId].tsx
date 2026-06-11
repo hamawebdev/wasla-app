@@ -9,7 +9,6 @@ import {
   Home,
   MapPin,
   MessageCircle,
-  Phone,
   Star,
 } from 'lucide-react-native';
 import * as React from 'react';
@@ -17,7 +16,6 @@ import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Image,
-  Linking,
   Pressable,
   StyleSheet,
   View,
@@ -48,7 +46,6 @@ const BORDER = 'hsl(198, 21%, 88%)';
 const SURFACE = 'hsl(180, 25%, 96%)';
 const GOLD = 'hsl(38, 92%, 50%)';
 const SOFT_BG = 'hsl(258, 35%, 92%)';
-const DEMO_PHONE = '+213555000000';
 
 const STEP_ORDER: TrackingStatus[] = ['accepted', 'on_the_way', 'arrived'];
 
@@ -165,10 +162,6 @@ export default function TrackScreen() {
 
   const handleChat = () => {
     router.push('/(customer)/chat/t1');
-  };
-
-  const handleCall = () => {
-    Linking.openURL(`tel:${DEMO_PHONE}`).catch(() => {});
   };
 
   return (
@@ -289,16 +282,10 @@ export default function TrackScreen() {
 
           {/* Actions */}
           <View style={styles.actionsRow}>
-            <Pressable style={[styles.actionBtn, styles.actionSecondary]} onPress={handleChat}>
-              <MessageCircle size={20} color={DARK} />
-              <Text variant="body" weight="medium" style={{ color: DARK }}>
-                {t('booking.track_chat')}
-              </Text>
-            </Pressable>
-            <Pressable style={[styles.actionBtn, styles.actionPrimary]} onPress={handleCall}>
-              <Phone size={20} color="#fff" />
+            <Pressable style={[styles.actionBtn, styles.actionPrimary]} onPress={handleChat}>
+              <MessageCircle size={20} color="#fff" />
               <Text variant="body" weight="medium" style={{ color: '#fff' }}>
-                {t('booking.track_call')}
+                {t('booking.track_chat')}
               </Text>
             </Pressable>
           </View>
@@ -492,7 +479,6 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 12,
   },
-  actionSecondary: { backgroundColor: PRIMARY_SOFT },
   actionPrimary: {
     backgroundColor: PRIMARY,
     shadowColor: PRIMARY,

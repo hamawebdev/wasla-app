@@ -5,7 +5,6 @@ import {
   Mic,
   MoreVertical,
   Paperclip,
-  Phone,
   Send,
   X,
 } from 'lucide-react-native';
@@ -174,9 +173,6 @@ export default function ChatRoomScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          <Pressable style={styles.headerBtn} hitSlop={8}>
-            <Phone size={20} color={PRIMARY} />
-          </Pressable>
           <Avatar
             source={thread.providerAvatar ? { uri: thread.providerAvatar } : undefined}
             name={thread.providerName}
